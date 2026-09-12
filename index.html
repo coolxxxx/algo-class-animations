@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++ 算法动画课堂</title>
+<style>
+  :root {
+    --bg:#0f1419; --panel:#1a222c; --line:#2e3d4f;
+    --ink:#e8eef5; --soft:#8b9aab; --cy:#4cc2ff; --am:#ff9f43; --gn:#3dd68c;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    background:var(--bg); color:var(--ink); min-height:100vh; padding:28px 16px 48px;
+  }
+  .wrap { max-width:960px; margin:0 auto; }
+  header { text-align:center; margin-bottom:22px; }
+  h1 { font-size:28px; font-weight:900; letter-spacing:.02em; }
+  .sub { color:var(--soft); font-size:14px; margin-top:6px; line-height:1.6; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+  .card {
+    background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:16px; display:flex; flex-direction:column; gap:8px; min-height:170px;
+  }
+  .card h2 { font-size:16px; color:#fff; }
+  .badge {
+    display:inline-block; width:fit-content; font-size:11px; font-weight:700;
+    padding:2px 10px; border-radius:999px;
+    background:rgba(76,194,255,.12); color:var(--cy); border:1px solid rgba(76,194,255,.3);
+  }
+  .badge.am { background:rgba(255,159,67,.12); color:var(--am); border-color:rgba(255,159,67,.35); }
+  .badge.gn { background:rgba(61,214,140,.12); color:var(--gn); border-color:rgba(61,214,140,.35); }
+  .card p { font-size:13px; color:var(--soft); line-height:1.6; flex:1; }
+  .links { display:flex; gap:8px; flex-wrap:wrap; }
+  a.btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:8px 12px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:800;
+    background:linear-gradient(135deg,#3dd68c,#0ea5a5); color:#04121f;
+  }
+  a.btn.sec {
+    background:rgba(126,164,222,.12); color:var(--ink); border:1px solid var(--line);
+  }
+  footer {
+    margin-top:28px; text-align:center; color:var(--soft); font-size:12px; line-height:1.7;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>C++ 算法动画课堂</h1>
+    <div class="sub">
+      角色动画先看懂 · 白板片巩固 · 代码骨架落地做题<br/>
+      递归 / 分治 / 贪心 / 结构体 / 数组排序
+    </div>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <span class="badge">概念 + 例题</span>
+      <h2>递归</h2>
+      <p>工作台故事 → 递/归 → 甩锅思维 → 三要素；含求和例题、代码三段与 n=5 执行过程。</p>
+      <div class="links">
+        <a class="btn sec" href="videos/recursion.mp4">白板片 2:43</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="badge">分治 · 贪心</span>
+      <h2>归并排序 & 活动选择</h2>
+      <p>两摞考卷合并、教室排活动。可单步、可自动播放，代码折叠在「进阶」。</p>
+      <div class="links">
+        <a class="btn" href="divide-greedy.html">交互动画</a>
+        <a class="btn sec" href="videos/divide-greedy.mp4">白板片 1:17</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="badge am">结构体 1</span>
+      <h2>档案袋比喻</h2>
+      <p>散装变量 → 结构体打包；定义、创建、点号访问、结构体数组。</p>
+      <div class="links">
+        <a class="btn" href="struct.html">交互动画</a>
+        <a class="btn sec" href="videos/struct.mp4">白板片 1:10</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="badge am">结构体 2</span>
+      <h2>数组排序 · sort / cmp</h2>
+      <p>交换灾难、默认 sort、cmp 裁判、成绩表排序（P1502 思路）。</p>
+      <div class="links">
+        <a class="btn" href="struct-sort.html">交互动画</a>
+        <a class="btn sec" href="videos/struct-sort.mp4">白板片 1:17</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="badge gn">加长</span>
+      <h2>多关键字 VIP 排序</h2>
+      <p>裁判逐步出牌：先比 VIP，同级比到达序号。插入式比较日志。</p>
+      <div class="links">
+        <a class="btn" href="vip-sort.html">逐步演示</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="badge">题单</span>
+      <h2>课堂练习与骨架</h2>
+      <p>C++ 可编译骨架、易错点、递进题单，可直接给学生做作业。</p>
+      <div class="links">
+        <a class="btn sec" href="notes-divide-greedy.md">分治贪心</a>
+        <a class="btn sec" href="notes-struct.md">结构体 1</a>
+        <a class="btn sec" href="notes-struct-sort.md">结构体 2</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    建议学习顺序：交互动画（先懂）→ 白板片（巩固）→ 题单（动手）<br/>
+    纯静态页，无外网依赖，可投影上课。
+  </footer>
+</div>
+</body>
+</html>

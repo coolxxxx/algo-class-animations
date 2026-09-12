@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动画角色课堂 · 分治与贪心</title>
+<style>
+  :root {
+    --paper: #fff7ed;
+    --ink: #1f2937;
+    --soft: #78716c;
+    --card: #ffffff;
+    --line: #fed7aa;
+    --blue: #2563eb;
+    --orange: #ea580c;
+    --green: #059669;
+    --yellow: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background:
+      radial-gradient(60% 40% at 50% 0%, #fde68a33, transparent),
+      var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 18px 14px 56px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 12px; }
+  header h1 { font-size: 28px; font-weight: 900; letter-spacing: .02em; }
+  header p { color: var(--soft); margin-top: 6px; font-size: 14px; }
+  .tabs { display: flex; justify-content: center; gap: 8px; margin: 16px 0 18px; flex-wrap: wrap; }
+  .tab {
+    border: 2px solid #e7e5e4; background: #fff; padding: 12px 20px;
+    border-radius: 999px; font-size: 15px; font-weight: 800; color: #78716c; cursor: pointer;
+  }
+  .tab.on { border-color: var(--blue); color: var(--blue); background: #eff6ff; }
+  .tab.on.g { border-color: var(--green); color: #047857; background: #ecfdf5; }
+
+  .story {
+    background: #fff; border: 2px solid #f5e6d3; border-radius: 18px;
+    padding: 14px 16px; margin-bottom: 12px; font-size: 15.5px; line-height: 1.7;
+  }
+  .story strong { color: var(--blue); }
+
+  .theater {
+    background: linear-gradient(180deg, #fffdf8, #fff7ed);
+    border: 3px solid #fdba74; border-radius: 22px;
+    padding: 16px 12px 20px; position: relative; overflow: hidden;
+  }
+  .cap {
+    text-align: center; font-size: 19px; font-weight: 800; line-height: 1.45;
+    min-height: 56px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center;
+  }
+  .cap em { font-style: normal; color: var(--orange); }
+  .cap .ok { color: var(--green); }
+
+  /* characters */
+  .cast {
+    display: flex; justify-content: center; align-items: flex-end; gap: 18px;
+    margin-bottom: 8px; min-height: 96px;
+  }
+  .char { display: flex; flex-direction: column; align-items: center; width: 96px; }
+  .char svg { width: 84px; height: 84px; overflow: visible; }
+  .char .name {
+    margin-top: 2px; font-size: 12px; font-weight: 800; color: var(--soft);
+  }
+  .char.jump svg { animation: jump .55s ease; }
+  .char.point svg { animation: point .6s ease; }
+  .char.sad svg { animation: sad .7s ease; }
+  .char.happy svg { animation: happy .6s ease; }
+  @keyframes jump {
+    0%,100% { transform: translateY(0); }
+    40% { transform: translateY(-14px) scale(1.05); }
+  }
+  @keyframes point {
+    0%,100% { transform: translateX(0) rotate(0); }
+    40% { transform: translateX(8px) rotate(4deg); }
+  }
+  @keyframes sad {
+    0%,100% { transform: rotate(0); filter: none; }
+    50% { transform: rotate(-4deg); filter: saturate(.7); }
+  }
+  @keyframes happy {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+
+  .bubble {
+    position: relative; max-width: 220px; margin: 0 auto 14px;
+    background: #fff; border: 2px solid #d6d3d1; border-radius: 16px;
+    padding: 10px 12px; font-size: 14px; line-height: 1.5; font-weight: 700;
+    text-align: center; min-height: 48px;
+  }
+  .bubble::after {
+    content: ''; position: absolute; left: 50%; bottom: -10px; transform: translateX(-50%);
+    border: 8px solid transparent; border-top-color: #fff;
+  }
+  .bubble.b2::before {
+    content: ''; position: absolute; left: 50%; bottom: -13px; transform: translateX(-50%);
+    border: 10px solid transparent; border-top-color: #d6d3d1; z-index: -1;
+  }
+
+  .piles {
+    display: flex; justify-content: center; align-items: flex-end; gap: 16px;
+    flex-wrap: wrap; min-height: 90px;
+  }
+  .pile { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .pile-label { font-size: 12px; font-weight: 800; color: var(--soft); }
+  .row { display: flex; gap: 6px; min-height: 48px; align-items: center; }
+  .book {
+    width: 46px; height: 46px; border-radius: 10px; display: grid; place-items: center;
+    font-size: 17px; font-weight: 900; transition: all .35s ease;
+    background: #dbeafe; border: 2px solid #93c5fd; color: #1e3a8a;
+    box-shadow: 0 2px 0 #93c5fd;
+  }
+  .book.orange { background: #ffedd5; border-color: #fdba74; color: #9a3412; box-shadow: 0 2px 0 #fdba74; }
+  .book.green {
+    background: #d1fae5; border-color: #34d399; color: #065f46;
+    transform: translateY(-4px) scale(1.06);
+    box-shadow: 0 6px 14px rgba(16,185,129,.28);
+  }
+  .book.dim { opacity: .3; transform: scale(.92); }
+  .book.ghost { visibility: hidden; }
+  .book.pop { animation: pop .45s ease; }
+  @keyframes pop {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.25) translateY(-8px); }
+    100% { transform: scale(1.06) translateY(-4px); }
+  }
+  .arrow { font-size: 26px; color: #a8a29e; align-self: center; font-weight: 900; }
+
+  /* calendar scene */
+  .cal { max-width: 760px; margin: 10px auto 0; display: flex; flex-direction: column; gap: 7px; }
+  .slot { display: grid; grid-template-columns: 92px 1fr; gap: 8px; align-items: center; }
+  .slot .t { font-size: 12px; font-weight: 800; color: var(--soft); text-align: right; }
+  .bar {
+    height: 46px; border-radius: 14px; display: flex; align-items: center; gap: 8px; padding: 0 12px;
+    font-weight: 900; font-size: 15px; color: #fff; background: #cbd5e1;
+    transition: all .4s ease;
+  }
+  .bar .mascot { font-size: 20px; line-height: 1; }
+  .bar.pick {
+    background: linear-gradient(90deg,#34d399,#059669);
+    box-shadow: 0 8px 20px rgba(16,185,129,.28); transform: scale(1.02);
+  }
+  .bar.skip { opacity: .38; filter: grayscale(.3); }
+  .bar.consider {
+    background: linear-gradient(90deg,#fbbf24,#f59e0b);
+    box-shadow: 0 0 0 3px rgba(245,158,11,.35);
+    animation: wiggle .5s ease;
+  }
+  @keyframes wiggle {
+    0%,100% { transform: translateX(0); }
+    30% { transform: translateX(-4px); }
+    70% { transform: translateX(4px); }
+  }
+  .bar .why { margin-left: auto; font-size: 12px; }
+
+  .controls { display: flex; justify-content: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .btn {
+    border: none; border-radius: 14px; padding: 12px 22px; font-size: 15px; font-weight: 900;
+    cursor: pointer; background: #e7e5e4; color: var(--ink); box-shadow: 0 3px 0 #d6d3d1;
+  }
+  .btn.main { background: var(--blue); color: #fff; box-shadow: 0 3px 0 #1d4ed8; }
+  .btn.main.g { background: var(--green); box-shadow: 0 3px 0 #047857; }
+  .btn:active { transform: translateY(2px); box-shadow: none; }
+
+  .tip {
+    margin-top: 14px; padding: 12px 14px; border-radius: 14px;
+    background: #fef3c7; color: #92400e; font-size: 14px; line-height: 1.65;
+  }
+  details.adv { margin-top: 16px; border-top: 2px dashed #fed7aa; padding-top: 12px; }
+  details.adv summary { cursor: pointer; font-size: 14px; font-weight: 800; color: var(--soft); }
+  details.adv pre {
+    margin-top: 10px; background: #1e293b; color: #e2e8f0; border-radius: 12px;
+    padding: 12px; overflow: auto; font-size: 12.5px; font-family: Consolas, monospace; line-height: 1.45;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>动画角色课堂 · 分治与贪心</h1>
+    <p>小明和社团小伙伴带你玩算法 · 先看故事，代码收在「进阶」</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab on" id="tabM">① 小明整理考卷（分治）</button>
+    <button class="tab g" id="tabG">② 社团抢教室（贪心）</button>
+  </div>
+
+  <!-- ===== MERGE ===== -->
+  <section id="secM">
+    <div class="story">
+      <strong>剧情：</strong>考试结束，小明手里有两摞已经按分数排好的考卷。
+      他要合成一摞，还要从小到大。别重新洗牌——每次比一比最上面两张就行！
+    </div>
+
+    <div class="theater">
+      <div class="cap" id="mCap">点「播放」，看小明怎么操作</div>
+      <div class="bubble b2" id="mBubble">我左手一张，右手一张，谁小谁先进新摞！</div>
+      <div class="cast">
+        <div class="char" id="charM">
+          <!-- 小明 -->
+          <svg viewBox="0 0 100 100" aria-label="小明">
+            <circle cx="50" cy="28" r="16" fill="#fde68a" stroke="#b45309" stroke-width="2.5"/>
+            <circle cx="44" cy="27" r="2.2" fill="#1f2937"/>
+            <circle cx="56" cy="27" r="2.2" fill="#1f2937"/>
+            <path d="M44 34 q6 5 12 0" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round"/>
+            <path d="M34 18 q16 -12 32 0" fill="#78350f"/>
+            <rect x="32" y="46" width="36" height="30" rx="10" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+            <rect x="22" y="50" width="12" height="22" rx="5" fill="#fde68a" stroke="#b45309" stroke-width="2"/>
+            <rect x="66" y="50" width="12" height="22" rx="5" fill="#fde68a" stroke="#b45309" stroke-width="2"/>
+            <rect x="36" y="74" width="10" height="14" rx="3" fill="#1e3a8a"/>
+            <rect x="54" y="74" width="10" height="14" rx="3" fill="#1e3a8a"/>
+          </svg>
+          <div class="name">小明</div>
+        </div>
+      </div>
+
+      <div class="piles" id="mPiles"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="mReset">重来</button>
+      <button class="btn main" id="mPlay">播放</button>
+      <button class="btn" id="mNext">下一步</button>
+    </div>
+
+    <div class="tip">
+      <b>为什么记得住：</b>你在看「小明办事」，不是背定义。
+      只要会「两摞已排序怎么合一摞」，重复到最小片段上，就是归并排序。
+    </div>
+
+    <details class="adv">
+      <summary>进阶：C++ 代码</summary>
+      <pre>void merge(vector&lt;int&gt;&amp; a, vector&lt;int&gt;&amp; tmp, int lo, int mid, int hi) {
+    int i = lo, j = mid, k = lo;
+    while (i &lt; mid &amp;&amp; j &lt; hi) {
+        if (a[i] &lt;= a[j]) tmp[k++] = a[i++];  // 谁小取谁
+        else              tmp[k++] = a[j++];
+    }
+    while (i &lt; mid) tmp[k++] = a[i++];
+    while (j &lt; hi)  tmp[k++] = a[j++];
+    for (int t = lo; t &lt; hi; ++t) a[t] = tmp[t];
+}</pre>
+    </details>
+  </section>
+
+  <!-- ===== GREEDY ===== -->
+  <section id="secG" style="display:none">
+    <div class="story">
+      <strong>剧情：</strong>学校只有一间活动室！美术社、篮球社、编程社……都递了申请。
+      干事小圆要排最多场。她的秘密：<strong>先办结束得早的</strong>，后面才空得出来。
+    </div>
+
+    <div class="theater">
+      <div class="cap" id="gCap">点「播放」，看小圆怎么排课</div>
+      <div class="bubble b2" id="gBubble">结束得越早，后面越能塞进更多社团！</div>
+      <div class="cast">
+        <div class="char" id="charG">
+          <!-- 小圆（干事） -->
+          <svg viewBox="0 0 100 100" aria-label="小圆">
+            <circle cx="50" cy="30" r="17" fill="#fecdd3" stroke="#be123c" stroke-width="2.5"/>
+            <circle cx="43" cy="29" r="2.2" fill="#1f2937"/>
+            <circle cx="57" cy="29" r="2.2" fill="#1f2937"/>
+            <path d="M44 37 q6 4 12 0" fill="none" stroke="#be123c" stroke-width="2" stroke-linecap="round"/>
+            <path d="M33 20 q17 -14 34 0" fill="#881337"/>
+            <rect x="30" y="48" width="40" height="30" rx="12" fill="#f43f5e" stroke="#be123c" stroke-width="2"/>
+            <rect x="20" y="52" width="12" height="20" rx="5" fill="#fecdd3" stroke="#be123c" stroke-width="2"/>
+            <rect x="68" y="52" width="12" height="20" rx="5" fill="#fecdd3" stroke="#be123c" stroke-width="2"/>
+            <rect x="36" y="76" width="10" height="12" rx="3" fill="#9f1239"/>
+            <rect x="54" y="76" width="10" height="12" rx="3" fill="#9f1239"/>
+          </svg>
+          <div class="name">干事小圆</div>
+        </div>
+      </div>
+      <div class="cal" id="gCal"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="gReset">重来</button>
+      <button class="btn main g" id="gPlay">播放</button>
+      <button class="btn" id="gNext">下一步</button>
+      <button class="btn" id="gShuffle">换一批申请</button>
+    </div>
+
+    <div class="tip">
+      <b>为什么记得住：</b>绿彩条=社团开心入驻，灰彩条=时间撞车只能走。
+      你会自然记住「结束早优先」，而不是死背排序规则。
+    </div>
+
+    <details class="adv">
+      <summary>进阶：C++ 代码</summary>
+      <pre>struct Act { int s, e; };
+
+int selectActs(vector&lt;Act&gt; v) {
+    sort(v.begin(), v.end(), [](const Act&amp; a, const Act&amp; b) {
+        return a.e &lt; b.e;          // 按结束时间升序
+    });
+    int cnt = 0, lastEnd = 0;
+    for (auto&amp; a : v) {
+        if (a.s &gt;= lastEnd) {      // 能接上就选
+            ++cnt;
+            lastEnd = a.e;
+        }
+    }
+    return cnt;
+}</pre>
+    </details>
+  </section>
+</div>
+
+<script>
+function flashChar(id, cls) {
+  const el = document.getElementById(id);
+  el.classList.remove('jump','point','sad','happy');
+  void el.offsetWidth;
+  el.classList.add(cls);
+  setTimeout(() => el.classList.remove(cls), 700);
+}
+
+/* ========== merge ========== */
+const LEFT = [3, 27, 38];
+const RIGHT = [9, 10, 43];
+let mState = null, mTimer = null;
+
+function mInit() {
+  mState = { left: LEFT.slice(), right: RIGHT.slice(), result: [], li: 0, ri: 0, done: false };
+  document.getElementById('mBubble').textContent = '两摞都排好序啦，开始合并！';
+  mRender('两摞考卷都已按分数排好。开始合并！');
+  setMPlay(false);
+}
+
+function bookEl(v, cls, pop) {
+  const d = document.createElement('div');
+  d.className = 'book' + (cls ? ' ' + cls : '') + (pop ? ' pop' : '');
+  d.textContent = v;
+  return d;
+}
+
+function mRender(cap, hl, justPicked) {
+  const el = document.getElementById('mPiles');
+  el.innerHTML = '';
+  const L = document.createElement('div');
+  L.className = 'pile';
+  L.innerHTML = '<div class="pile-label">左摞</div>';
+  const lr = document.createElement('div'); lr.className = 'row';
+  mState.left.forEach((v, i) => {
+    let c = '';
+    if (i < mState.li) c = 'dim';
+    else if (hl === 'left' && i === mState.li) c = 'green';
+    lr.appendChild(bookEl(v, c, false));
+  });
+  L.appendChild(lr); el.appendChild(L);
+
+  const a = document.createElement('div'); a.className = 'arrow'; a.textContent = '↔';
+  el.appendChild(a);
+
+  const R = document.createElement('div');
+  R.className = 'pile';
+  R.innerHTML = '<div class="pile-label">右摞</div>';
+  const rr = document.createElement('div'); rr.className = 'row';
+  mState.right.forEach((v, i) => {
+    let c = 'orange';
+    if (i < mState.ri) c = 'orange dim';
+    else if (hl === 'right' && i === mState.ri) c = 'orange green';
+    rr.appendChild(bookEl(v, c, false));
+  });
+  R.appendChild(rr); el.appendChild(R);
+
+  const a2 = document.createElement('div'); a2.className = 'arrow'; a2.textContent = '→';
+  el.appendChild(a2);
+
+  const O = document.createElement('div');
+  O.className = 'pile';
+  O.innerHTML = '<div class="pile-label">新摞</div>';
+  const or = document.createElement('div'); or.className = 'row';
+  mState.result.forEach((v, idx) => {
+    or.appendChild(bookEl(v, 'green', justPicked && idx === mState.result.length - 1));
+  });
+  for (let i = mState.result.length; i < 6; i++) {
+    const g = document.createElement('div'); g.className = 'book ghost'; or.appendChild(g);
+  }
+  O.appendChild(or); el.appendChild(O);
+  document.getElementById('mCap').innerHTML = cap;
+}
+
+function mStep() {
+  const s = mState;
+  if (s.done) return false;
+  if (s.li < s.left.length && s.ri < s.right.length) {
+    const lv = s.left[s.li], rv = s.right[s.ri];
+    flashChar('charM', 'point');
+    if (lv <= rv) {
+      s.result.push(lv); s.li++;
+      document.getElementById('mBubble').textContent = `左手 ${lv} 更小，先进！`;
+      mRender(`左手 <em>${lv}</em> ≤ 右手 <em>${rv}</em>，先放 <em>${lv}</em>`, 'left', true);
+    } else {
+      s.result.push(rv); s.ri++;
+      document.getElementById('mBubble').textContent = `右手 ${rv} 更小，先进！`;
+      mRender(`右手 <em>${rv}</em> 更小，先放 <em>${rv}</em>`, 'right', true);
+    }
+  } else if (s.li < s.left.length) {
+    const v = s.left[s.li++];
+    s.result.push(v);
+    flashChar('charM', 'happy');
+    document.getElementById('mBubble').textContent = `左摞还有 ${v}，全倒进去！`;
+    mRender(`左摞剩余 <em>${v}</em> 直接放入`, 'left', true);
+  } else if (s.ri < s.right.length) {
+    const v = s.right[s.ri++];
+    s.result.push(v);
+    flashChar('charM', 'happy');
+    document.getElementById('mBubble').textContent = `右摞还有 ${v}，全倒进去！`;
+    mRender(`右摞剩余 <em>${v}</em> 直接放入`, 'right', true);
+  } else {
+    s.done = true;
+    flashChar('charM', 'happy');
+    document.getElementById('mBubble').textContent = '搞定！这就是「合并」的绝招～';
+    mRender(`<span class="ok">完成！</span> 新摞：${s.result.join('，')}`);
+    setMPlay(false);
+    return false;
+  }
+  return true;
+}
+
+function setMPlay(on) {
+  document.getElementById('mPlay').textContent = on ? '暂停' : '播放';
+}
+document.getElementById('mNext').onclick = () => mStep();
+document.getElementById('mReset').onclick = () => {
+  if (mTimer) { clearInterval(mTimer); mTimer = null; }
+  mInit();
+};
+document.getElementById('mPlay').onclick = () => {
+  if (mTimer) { clearInterval(mTimer); mTimer = null; setMPlay(false); return; }
+  setMPlay(true);
+  mTimer = setInterval(() => { if (!mStep()) { clearInterval(mTimer); mTimer = null; setMPlay(false); } }, 1500);
+};
+
+/* ========== greedy ========== */
+const MASCOTS = { '美术社':'🎨','篮球社':'🏀','合唱团':'🎤','编程社':'💻','天文社':'🔭','话剧社':'🎭','围棋社':'♟️','机器人':'🤖' };
+const POOL = [
+  { n: '美术社', s: 9, e: 10 },
+  { n: '篮球社', s: 9.5, e: 11 },
+  { n: '合唱团', s: 10, e: 12 },
+  { n: '编程社', s: 11, e: 12.5 },
+  { n: '天文社', s: 12, e: 13 },
+  { n: '话剧社', s: 13, e: 15 },
+  { n: '围棋社', s: 14, e: 16 },
+  { n: '机器人', s: 15.5, e: 17 },
+];
+let gActs = [], gSorted = [], gIdx = 0, gPicked = [], gLastEnd = 0, gTimer = null;
+
+function pick() {
+  const a = POOL.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, 6);
+}
+function fmt(t) {
+  const h = Math.floor(t), m = Math.round((t - h) * 60);
+  return `${h}:${m === 0 ? '00' : '30'}`;
+}
+function gInit() {
+  gActs = pick();
+  gSorted = gActs.slice().sort((a, b) => a.e - b.e || a.s - b.s);
+  gIdx = 0; gPicked = []; gLastEnd = 0;
+  document.getElementById('gBubble').textContent = '按结束时间排好队，能接上就办！';
+  gRender('已按结束时间从早到晚排好。每次看一个社团…', null);
+  setGPlay(false);
+}
+function gRender(cap, consider) {
+  const el = document.getElementById('gCal');
+  el.innerHTML = '';
+  gSorted.forEach(act => {
+    const slot = document.createElement('div'); slot.className = 'slot';
+    const t = document.createElement('div'); t.className = 't';
+    t.textContent = fmt(act.s) + '–' + fmt(act.e);
+    const bar = document.createElement('div'); bar.className = 'bar';
+    const picked = gPicked.some(x => x.n === act.n);
+    if (picked) bar.classList.add('pick');
+    if (consider === act.n) bar.classList.add('consider');
+    else if (!picked && gIdx > 0 && gSorted.indexOf(act) < gIdx) bar.classList.add('skip');
+    if (gIdx >= gSorted.length && !picked) bar.classList.add('skip');
+    const m = MASCOTS[act.n] || '⭐';
+    bar.innerHTML = `<span class="mascot">${m}</span><span>${act.n}</span>` +
+      (picked ? `<span class="why">✓ 入驻</span>` :
+       consider === act.n ? `<span class="why">看看行不行…</span>` : '');
+    slot.appendChild(t); slot.appendChild(bar); el.appendChild(slot);
+  });
+  const names = gPicked.map(a => (MASCOTS[a.n] || '') + a.n).join('　') || '（还没选）';
+  document.getElementById('gCap').innerHTML =
+    `${cap}<br><span style="font-size:15px;color:#047857">已入选：${names}</span>`;
+}
+function gStep() {
+  if (gIdx >= gSorted.length) {
+    flashChar('charG', 'happy');
+    document.getElementById('gBubble').textContent = '这就是能办成的最多场次！';
+    gRender('全部看完。最多场次达成！', null);
+    setGPlay(false);
+    return false;
+  }
+  const act = gSorted[gIdx];
+  flashChar('charG', 'point');
+  document.getElementById('gBubble').textContent = `先看看 ${MASCOTS[act.n] || ''}${act.n}…`;
+  gRender(`正在看 <em>${act.n}</em>（${fmt(act.s)}–${fmt(act.e)}）`, act.n);
+  setTimeout(() => {
+    if (act.s >= gLastEnd) {
+      gPicked.push(act); gLastEnd = act.e; gIdx++;
+      flashChar('charG', 'happy');
+      document.getElementById('gBubble').textContent = `${act.n} 可以办！`;
+      gRender(`<span class="ok">办！</span> 时间不冲突。`, null);
+    } else {
+      gIdx++;
+      flashChar('charG', 'sad');
+      document.getElementById('gBubble').textContent = `${act.n} 撞车了，下次吧…`;
+      gRender(`跳过 <em>${act.n}</em>：时间撞车`, null);
+    }
+  }, 750);
+  return true;
+}
+function setGPlay(on) { document.getElementById('gPlay').textContent = on ? '暂停' : '播放'; }
+document.getElementById('gNext').onclick = () => gStep();
+document.getElementById('gReset').onclick = () => { if (gTimer) { clearInterval(gTimer); gTimer = null; } gInit(); };
+document.getElementById('gShuffle').onclick = () => { if (gTimer) { clearInterval(gTimer); gTimer = null; } gInit(); };
+document.getElementById('gPlay').onclick = () => {
+  if (gTimer) { clearInterval(gTimer); gTimer = null; setGPlay(false); return; }
+  setGPlay(true);
+  gTimer = setInterval(() => {
+    if (gIdx >= gSorted.length) { gStep(); clearInterval(gTimer); gTimer = null; setGPlay(false); return; }
+    gStep();
+  }, 1700);
+};
+
+/* tabs */
+const tabM = document.getElementById('tabM');
+const tabG = document.getElementById('tabG');
+const secM = document.getElementById('secM');
+const secG = document.getElementById('secG');
+tabM.onclick = () => { tabM.classList.add('on'); tabG.classList.remove('on'); secM.style.display = ''; secG.style.display = 'none'; };
+tabG.onclick = () => { tabG.classList.add('on'); tabM.classList.remove('on'); secG.style.display = ''; secM.style.display = 'none'; };
+
+mInit();
+gInit();
+</script>
+</body>
+</html>

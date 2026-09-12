@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动画课堂 · 多关键字 VIP 排序（加长版）</title>
+<style>
+  :root {
+    --paper:#f3efe6; --ink:#1f2937; --soft:#6b7280;
+    --blue:#2563eb; --orange:#ea580c; --green:#059669; --red:#dc2626; --purple:#7c3aed;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    background: radial-gradient(50% 40% at 50% 0%, #fde68a44, transparent), var(--paper);
+    color:var(--ink); min-height:100vh; padding:18px 14px 48px;
+  }
+  .wrap { max-width:1000px; margin:0 auto; }
+  header { text-align:center; margin-bottom:12px; }
+  h1 { font-size:24px; font-weight:900; }
+  header p { color:var(--soft); font-size:13.5px; margin-top:4px; }
+  .story {
+    background:#fff; border:2px solid #e5e7eb; border-radius:14px;
+    padding:12px 14px; margin-bottom:10px; font-size:14.5px; line-height:1.7;
+  }
+  .story strong { color:var(--blue); }
+  .theater {
+    background:#fffdf8; border:3px solid #fcd34d; border-radius:18px;
+    padding:14px 12px 18px;
+  }
+  .cap {
+    text-align:center; font-size:17px; font-weight:800; line-height:1.45;
+    min-height:48px; margin-bottom:6px;
+  }
+  .cap em { font-style:normal; color:var(--orange); }
+  .cap .ok { color:var(--green); }
+  .cap .no { color:var(--red); }
+  .bubble {
+    max-width:520px; margin:0 auto 10px; background:#fff; border:2px solid #d6d3d1;
+    border-radius:12px; padding:8px 12px; font-size:13.5px; font-weight:700;
+    text-align:center; min-height:40px;
+  }
+  .cast { display:flex; justify-content:center; gap:18px; margin-bottom:6px; }
+  .char { width:72px; text-align:center; }
+  .char svg { width:68px; height:68px; }
+  .char .nm { font-size:11px; font-weight:800; color:var(--soft); }
+  .char.jump svg { animation: jump .45s ease; }
+  @keyframes jump { 0%,100%{transform:translateY(0)} 45%{transform:translateY(-12px) scale(1.06)} }
+
+  /* person cards in array */
+  .arr { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:10px 0 6px; }
+  .p {
+    width:100px; background:#fff; border:2.5px solid #d1d5db; border-radius:12px;
+    padding:8px 6px; text-align:center; font-size:12px; transition:all .3s ease;
+    position:relative;
+  }
+  .p .em { font-size:22px; line-height:1.2; }
+  .p .meta { color:var(--soft); margin-top:2px; font-family:Consolas,monospace; font-size:11px; }
+  .p.vip2 { border-color:var(--purple); background:#f5f3ff; }
+  .p.vip1 { border-color:#c4b5fd; }
+  .p.left { transform:translateY(-8px); box-shadow:0 0 0 3px #fbbf24; border-color:#f59e0b; }
+  .p.right { transform:translateY(-8px); box-shadow:0 0 0 3px #93c5fd; border-color:var(--blue); }
+  .p.swap { animation:shake .35s ease; border-color:var(--red); }
+  .p.placed { border-color:var(--green); background:#ecfdf5; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  .p .tag {
+    position:absolute; top:-10px; left:50%; transform:translateX(-50%);
+    background:#f59e0b; color:#fff; font-size:10px; font-weight:800;
+    padding:1px 6px; border-radius:6px; white-space:nowrap;
+  }
+
+  .cmpbox {
+    display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center;
+    max-width:640px; margin:12px auto; background:#0f172a; color:#e2e8f0;
+    border-radius:12px; padding:12px 14px; font-family:Consolas,monospace; font-size:13px;
+  }
+  .cmpbox .vs { color:#fbbf24; font-weight:900; text-align:center; }
+  .cmpbox .side { text-align:center; }
+  .cmpbox .side b { color:#7dd3fc; }
+  .cmpbox .res {
+    grid-column:1/-1; text-align:center; margin-top:4px; padding-top:6px;
+    border-top:1px solid #334155; font-size:12.5px;
+  }
+  .cmpbox .res.yes { color:#6ee7b7; }
+  .cmpbox .res.no { color:#fda4af; }
+
+  .statusbar {
+    max-width:640px; margin:0 auto 8px; background:#1e293b; color:#e2e8f0;
+    border-radius:10px; padding:8px 12px; font-size:12.5px; text-align:center;
+    font-family:Consolas,monospace;
+  }
+  .statusbar .k { color:#7dd3fc; }
+  .statusbar .t { color:#f9a8d4; }
+  .statusbar .hl { background:#1e3a5f; display:inline-block; padding:0 4px; border-radius:4px; }
+
+  .controls { display:flex; justify-content:center; gap:10px; margin-top:14px; flex-wrap:wrap; }
+  .btn {
+    border:none; border-radius:12px; padding:11px 18px; font-size:14px; font-weight:900;
+    cursor:pointer; background:#e7e5e4; color:var(--ink); box-shadow:0 3px 0 #d6d3d1;
+  }
+  .btn.main { background:var(--blue); color:#fff; box-shadow:0 3px 0 #1d4ed8; }
+  .btn:active { transform:translateY(2px); box-shadow:none; }
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+  .tip {
+    margin-top:12px; padding:11px 13px; border-radius:12px;
+    background:#fef3c7; color:#92400e; font-size:13px; line-height:1.65;
+  }
+  .steps {
+    max-width:640px; margin:10px auto 0; font-size:12px; color:var(--soft);
+    max-height:90px; overflow:auto; background:#fff; border-radius:10px; padding:8px 10px;
+  }
+  .steps div { padding:2px 0; border-bottom:1px dashed #eee; }
+  .steps div:last-child { border:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>多关键字 VIP 排序 · 加长版</h1>
+    <p>裁判逐步裁决：先比 VIP，VIP 相同再比到达序号 · 逐步比较 + 交换日志</p>
+  </header>
+
+  <div class="story">
+    <strong>剧情：</strong>游乐场今天搞活动。规则只有两条——
+    ① <b>VIP 等级高的必须排前面</b>；
+    ② <b>VIP 等级相同时，谁先来谁排前面</b>。
+    裁判每轮抓两个人来问 <code>cmp(a,b)</code>：返回 true 就让 a 插到 b 前面。
+    点「下一步」，看裁判每一次出牌。
+  </div>
+
+  <div class="theater">
+    <div class="cap" id="cap">点「下一步」，跟裁判走完每一轮比较</div>
+    <div class="cast">
+      <div class="char" id="judge">
+        <svg viewBox="0 0 80 80">
+          <circle cx="40" cy="20" r="14" fill="#fde68a" stroke="#b45309" stroke-width="2"/>
+          <circle cx="35" cy="19" r="2" fill="#1f2937"/><circle cx="45" cy="19" r="2" fill="#1f2937"/>
+          <path d="M33 25 q7 5 14 0" fill="none" stroke="#b45309" stroke-width="2"/>
+          <rect x="22" y="36" width="36" height="30" rx="8" fill="#1f2937"/>
+          <rect x="8" y="40" width="18" height="14" rx="4" fill="#22c55e"/>
+          <rect x="54" y="40" width="18" height="14" rx="4" fill="#ef4444"/>
+        </svg>
+        <div class="nm">裁判</div>
+      </div>
+    </div>
+    <div class="bubble" id="bubble">VIP高的优先；同级则先来先排</div>
+    <div class="arr" id="arr"></div>
+    <div class="cmpbox" id="cmpbox" style="display:none">
+      <div class="side" id="sideA"></div>
+      <div class="vs">VS</div>
+      <div class="side" id="sideB"></div>
+      <div class="res" id="res"></div>
+    </div>
+    <div class="statusbar" id="status"></div>
+    <div class="steps" id="steps"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="btnReset">重来</button>
+    <button class="btn main" id="btnStep">下一步</button>
+    <button class="btn" id="btnAuto">自动播放</button>
+    <button class="btn" id="btnEnd">直接看结果</button>
+  </div>
+
+  <div class="tip">
+    <b>裁判心法：</b>先问「VIP 一样吗？」不一样 → VIP 大的 true。
+    一样 → 再问「到达序号更小吗？」更小 → true。两级都过不去 → false（不换）。
+  </div>
+
+  <details style="margin-top:14px; border-top:2px dashed #e5e7eb; padding-top:12px;">
+    <summary style="cursor:pointer; font-weight:800; color:var(--soft); font-size:14px;">对照 C++ 代码</summary>
+    <pre style="margin-top:10px; background:#1e293b; color:#e2e8f0; border-radius:12px; padding:12px; font-size:12.5px; font-family:Consolas,monospace; overflow:auto;">struct Person {
+    int vip;      // VIP 等级
+    int arrive;   // 到达序号
+    string name;
+};
+
+bool cmp(Person a, Person b) {
+    // ① 先比 VIP：高的排前面
+    if (a.vip != b.vip) return a.vip &gt; b.vip;
+    // ② VIP 相同：先来先排
+    return a.arrive &lt; b.arrive;
+}
+
+sort(p, p + n, cmp);</pre>
+  </details>
+</div>
+
+<script>
+// seed people: mix so we get both VIP-diff and VIP-tie comparisons
+const seed = [
+  { name: '小王', em: '👦', vip: 1, arrive: 3 },
+  { name: '小美', em: '👸', vip: 2, arrive: 5 },
+  { name: '小刚', em: '🧑', vip: 0, arrive: 1 },
+  { name: '小丽', em: '👧', vip: 2, arrive: 2 },
+  { name: '小明', em: '🙂', vip: 1, arrive: 4 },
+  { name: '小华', em: '😎', vip: 0, arrive: 6 },
+];
+
+let list = [];
+let steps = [];   // precomputed animation steps
+let si = 0;
+let timer = null;
+
+function clone(p) { return { ...p }; }
+
+// insertion-sort style step generator (easy to narrate pairwise cmp)
+function buildSteps(input) {
+  const a = input.map(clone);
+  const out = [];
+  out.push({
+    kind: 'init',
+    arr: a.map(clone),
+    say: '初始乱序队伍。裁判准备按 VIP → 到达序号 裁决。',
+    code: 'sort 开始（插入式叙述）',
+  });
+  for (let i = 1; i < a.length; i++) {
+    const key = { ...a[i] };
+    out.push({
+      kind: 'pick',
+      arr: a.map(clone),
+      hi: [i],
+      say: `取出第 ${i+1} 个：${key.em}${key.name}（VIP${key.vip}，#${key.arrive}）`,
+      code: `key = p[${i}]`,
+    });
+    let j = i - 1;
+    while (j >= 0) {
+      const left = { ...a[j] };
+      // evaluate cmp(key, left): should key go before left?
+      let why, go;
+      if (key.vip !== left.vip) {
+        go = key.vip > left.vip;
+        why = go
+          ? `VIP ${key.vip} > ${left.vip} → key 排前面`
+          : `VIP ${key.vip} < ${left.vip} → key 不排前面`;
+      } else {
+        go = key.arrive < left.arrive;
+        why = go
+          ? `VIP 相同，到达 #${key.arrive} < #${left.arrive} → key 排前面`
+          : `VIP 相同，到达 #${key.arrive} ≥ #${left.arrive} → key 不排前面`;
+      }
+      out.push({
+        kind: 'cmp',
+        arr: a.map(clone),
+        hi: [j, i],
+        pair: { a: key, b: left },
+        go,
+        why,
+        say: `比较 ${key.em}${key.name} 与 ${left.em}${left.name}：${why}`,
+        code: `cmp(key, p[${j}]) → ${go}`,
+      });
+      if (!go) break;
+      // swap left one position
+      a[j + 1] = { ...a[j] };
+      j--;
+      out.push({
+        kind: 'shift',
+        arr: a.map(clone),
+        hi: [Math.max(j + 1, 0)],
+        say: `${left.em}${left.name} 后移一格，给 key 腾位置`,
+        code: `p[${j+2}] = p[${j+1}]`,
+      });
+    }
+    a[j + 1] = key;
+    out.push({
+      kind: 'insert',
+      arr: a.map(clone),
+      hi: [j + 1],
+      say: `${key.em}${key.name} 插入到位（下标 ${j+1}）`,
+      code: `p[${j+1}] = key`,
+    });
+  }
+  out.push({
+    kind: 'done',
+    arr: a.map(clone),
+    say: '排序完成：VIP 高的在前，同级先来先排。',
+    code: 'sort 完成',
+  });
+  return out;
+}
+
+function pClass(p, extra) {
+  let c = 'p';
+  if (p.vip >= 2) c += ' vip2';
+  else if (p.vip === 1) c += ' vip1';
+  if (extra) c += ' ' + extra;
+  return c;
+}
+
+function render(st) {
+  const arrEl = document.getElementById('arr');
+  arrEl.innerHTML = '';
+  st.arr.forEach((p, i) => {
+    const extra =
+      st.hi && st.hi[0] === i && st.kind === 'cmp' ? 'left' :
+      st.hi && st.hi[1] === i && st.kind === 'cmp' ? 'right' :
+      st.hi && st.hi[0] === i ? 'left' :
+      st.kind === 'done' ? 'placed' : '';
+    const d = document.createElement('div');
+    d.className = pClass(p, extra);
+    let tag = '';
+    if (st.hi && st.hi[0] === i && st.kind === 'pick') tag = '<span class="tag">取出</span>';
+    if (st.hi && st.hi[0] === i && st.kind === 'insert') tag = '<span class="tag">插入</span>';
+    d.innerHTML = `${tag}<div class="em">${p.em}</div><b>${p.name}</b>
+      <div class="meta">VIP${p.vip} · #${p.arrive}</div>`;
+    arrEl.appendChild(d);
+  });
+
+  document.getElementById('cap').innerHTML = st.say;
+  document.getElementById('bubble').textContent =
+    st.kind === 'done' ? '两级规则：VIP 优先，同级先来' :
+    st.kind === 'cmp' ? '裁判：cmp(key, 左边)' :
+    st.kind === 'pick' ? '取出待插入的人' : '按规则排队…';
+
+  const box = document.getElementById('cmpbox');
+  if (st.kind === 'cmp' && st.pair) {
+    box.style.display = '';
+    document.getElementById('sideA').innerHTML =
+      `<b>key</b><br>${st.pair.a.em} ${st.pair.a.name}<br>V${st.pair.a.vip} #${st.pair.a.arrive}`;
+    document.getElementById('sideB').innerHTML =
+      `<b>p[j]</b><br>${st.pair.b.em} ${st.pair.b.name}<br>V${st.pair.b.vip} #${st.pair.b.arrive}`;
+    const res = document.getElementById('res');
+    res.textContent = (st.go ? 'return true → key 插到前面' : 'return false → 停止比较') + '｜' + st.why;
+    res.className = 'res ' + (st.go ? 'yes' : 'no');
+  } else {
+    box.style.display = 'none';
+  }
+
+  document.getElementById('status').innerHTML =
+    `<span class="hl">${st.code}</span> · 步骤 ${si + 1}/${steps.length}`;
+
+  const log = document.getElementById('steps');
+  const line = document.createElement('div');
+  line.textContent = `${si + 1}. ${st.say}`;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+
+  const judge = document.getElementById('judge');
+  if (st.kind === 'cmp' || st.kind === 'insert') {
+    judge.classList.remove('jump'); void judge.offsetWidth; judge.classList.add('jump');
+  }
+}
+
+function reset() {
+  if (timer) { clearInterval(timer); timer = null; document.getElementById('btnAuto').textContent = '自动播放'; }
+  list = seed.map(clone);
+  steps = buildSteps(list);
+  si = 0;
+  document.getElementById('steps').innerHTML = '';
+  render(steps[0]);
+  document.getElementById('btnStep').disabled = false;
+  document.getElementById('btnEnd').disabled = false;
+}
+
+function step() {
+  if (si >= steps.length - 1) {
+    document.getElementById('btnStep').disabled = true;
+    document.getElementById('btnEnd').disabled = true;
+    return false;
+  }
+  si++;
+  render(steps[si]);
+  return true;
+}
+
+function skipEnd() {
+  while (step()) { /* jump to final */ }
+}
+
+document.getElementById('btnReset').onclick = reset;
+document.getElementById('btnStep').onclick = step;
+document.getElementById('btnEnd').onclick = skipEnd;
+document.getElementById('btnAuto').onclick = function () {
+  const btn = document.getElementById('btnAuto');
+  if (timer) {
+    clearInterval(timer); timer = null;
+    btn.textContent = '自动播放';
+    return;
+  }
+  btn.textContent = '暂停';
+  timer = setInterval(() => {
+    if (!step()) {
+      clearInterval(timer); timer = null;
+      btn.textContent = '自动播放';
+    }
+  }, 900);
+};
+
+reset();
+</script>
+</body>
+</html>

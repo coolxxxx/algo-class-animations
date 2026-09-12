@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动画课堂 · C++ 结构体</title>
+<style>
+  :root {
+    --paper: #f3efe6;
+    --ink: #1f2937;
+    --soft: #6b7280;
+    --blue: #2563eb;
+    --orange: #ea580c;
+    --green: #059669;
+    --folder: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background: radial-gradient(50% 40% at 50% 0%, #fde68a44, transparent), var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 18px 14px 50px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 14px; }
+  h1 { font-size: 26px; font-weight: 900; }
+  header p { color: var(--soft); font-size: 14px; margin-top: 4px; }
+
+  .tabs { display: flex; justify-content: center; gap: 8px; margin: 14px 0 16px; flex-wrap: wrap; }
+  .tab {
+    border: 2px solid #e7e5e4; background: #fff; padding: 11px 18px;
+    border-radius: 999px; font-size: 14px; font-weight: 800; color: var(--soft); cursor: pointer;
+  }
+  .tab.on { border-color: var(--blue); color: var(--blue); background: #eff6ff; }
+
+  .story {
+    background: #fff; border: 2px solid #e5e7eb; border-radius: 16px;
+    padding: 14px 16px; margin-bottom: 12px; font-size: 15px; line-height: 1.7;
+  }
+  .story strong { color: var(--blue); }
+
+  .theater {
+    background: #fffdf8; border: 3px solid #fcd34d; border-radius: 20px;
+    padding: 16px 14px 20px; min-height: 360px;
+  }
+  .cap {
+    text-align: center; font-size: 18px; font-weight: 800; line-height: 1.45;
+    min-height: 52px; margin-bottom: 8px;
+  }
+  .cap em { font-style: normal; color: var(--orange); }
+  .cap .ok { color: var(--green); }
+
+  .cast { display: flex; justify-content: center; margin-bottom: 10px; }
+  .char { width: 88px; text-align: center; }
+  .char svg { width: 80px; height: 80px; }
+  .char .name { font-size: 12px; font-weight: 800; color: var(--soft); }
+  .char.jump svg { animation: jump .5s ease; }
+  @keyframes jump {
+    0%,100% { transform: translateY(0); }
+    45% { transform: translateY(-12px) scale(1.05); }
+  }
+
+  .bubble {
+    max-width: 280px; margin: 0 auto 14px; background: #fff;
+    border: 2px solid #d6d3d1; border-radius: 14px; padding: 10px 12px;
+    font-size: 14px; font-weight: 700; text-align: center; min-height: 44px;
+  }
+
+  .stage {
+    display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+    align-items: flex-start; min-height: 220px;
+  }
+
+  /* folder / struct card */
+  .folder {
+    width: 240px; background: linear-gradient(180deg,#fff7cc,#fef3c7);
+    border: 2.5px solid #d97706; border-radius: 14px 14px 10px 10px;
+    padding: 0 0 12px; box-shadow: 0 6px 16px rgba(217,119,6,.18);
+    transition: all .35s ease;
+  }
+  .folder .tab-top {
+    background: #f59e0b; color: #fff; font-weight: 900; font-size: 13px;
+    padding: 6px 12px; border-radius: 10px 10px 0 0; letter-spacing: .04em;
+  }
+  .folder .body { padding: 10px 12px 4px; }
+  .folder.empty .body { opacity: .25; }
+  .folder.full { transform: scale(1.03); box-shadow: 0 10px 22px rgba(217,119,6,.28); }
+
+  .row {
+    display: grid; grid-template-columns: 72px 1fr; gap: 6px;
+    margin-bottom: 6px; align-items: center;
+  }
+  .row .k {
+    font-size: 12px; font-weight: 800; color: #92400e; text-align: right;
+  }
+  .row .v {
+    background: #fff; border: 1.5px solid #fcd34d; border-radius: 8px;
+    padding: 6px 8px; font-family: Consolas, monospace; font-size: 14px;
+    font-weight: 700; color: #1f2937; min-height: 28px;
+  }
+  .row .v.blank { background: #fef9c3; color: #a8a29e; font-weight: 500; }
+  .row .v.hl { animation: flash .7s ease; border-color: var(--green); }
+  @keyframes flash {
+    0% { background: #d1fae5; transform: scale(1.04); }
+    100% { background: #fff; transform: scale(1); }
+  }
+
+  .codebox {
+    width: min(360px, 100%); background: #0f172a; color: #e2e8f0;
+    border-radius: 14px; padding: 14px; font-family: Consolas, monospace;
+    font-size: 13px; line-height: 1.55; white-space: pre; overflow: auto;
+  }
+  .codebox .k { color: #7dd3fc; }
+  .codebox .t { color: #f9a8d4; }
+  .codebox .c { color: #64748b; }
+  .codebox .hl { background: #1e3a5f; display: inline-block; width: 100%; }
+
+  .controls { display: flex; justify-content: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .btn {
+    border: none; border-radius: 12px; padding: 12px 20px; font-size: 14px;
+    font-weight: 900; cursor: pointer; background: #e7e5e4; color: var(--ink);
+    box-shadow: 0 3px 0 #d6d3d1;
+  }
+  .btn.main { background: var(--blue); color: #fff; box-shadow: 0 3px 0 #1d4ed8; }
+  .btn:active { transform: translateY(2px); box-shadow: none; }
+
+  .tip {
+    margin-top: 14px; padding: 12px 14px; border-radius: 12px;
+    background: #fef3c7; color: #92400e; font-size: 13.5px; line-height: 1.65;
+  }
+  details.adv { margin-top: 14px; border-top: 2px dashed #e5e7eb; padding-top: 12px; }
+  details.adv summary { cursor: pointer; font-weight: 800; color: var(--soft); font-size: 14px; }
+  details.adv pre {
+    margin-top: 10px; background: #1e293b; color: #e2e8f0; border-radius: 12px;
+    padding: 12px; font-size: 12.5px; font-family: Consolas, monospace; overflow: auto;
+  }
+
+  /* array of structs */
+  .cards { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .mini {
+    width: 120px; background: #fff; border: 2px solid #93c5fd; border-radius: 12px;
+    padding: 8px; font-size: 12px;
+  }
+  .mini b { color: var(--blue); display: block; margin-bottom: 4px; }
+  .mini.hl { border-color: var(--green); box-shadow: 0 0 0 3px #d1fae5; transform: scale(1.05); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>动画角色课堂 · C++ 结构体</h1>
+    <p>小明当学籍管理员：把学生信息装进同一份档案袋</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab on" id="t1">① 为什么要结构体</button>
+    <button class="tab" id="t2">② 定义与使用</button>
+    <button class="tab" id="t3">③ 结构体数组</button>
+  </div>
+
+  <!-- S1 -->
+  <section id="s1">
+    <div class="story">
+      <strong>剧情：</strong>没有结构体时，姓名、学号、分数是三个散装变量，容易记混。
+      有了结构体，就像把三张纸钉进<strong>同一份档案袋</strong>——一起传递、一起存放。
+    </div>
+    <div class="theater">
+      <div class="cap" id="c1">点「下一步」，看散装变量如何变成档案袋</div>
+      <div class="cast">
+        <div class="char" id="ch1">
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="28" r="16" fill="#fde68a" stroke="#b45309" stroke-width="2.5"/><circle cx="44" cy="27" r="2.2" fill="#1f2937"/><circle cx="56" cy="27" r="2.2" fill="#1f2937"/><path d="M44 34 q6 5 12 0" fill="none" stroke="#b45309" stroke-width="2"/><path d="M34 18 q16 -12 32 0" fill="#78350f"/><rect x="32" y="46" width="36" height="30" rx="10" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/><rect x="22" y="50" width="12" height="22" rx="5" fill="#fde68a" stroke="#b45309" stroke-width="2"/><rect x="66" y="50" width="12" height="22" rx="5" fill="#fde68a" stroke="#b45309" stroke-width="2"/></svg>
+          <div class="name">小明</div>
+        </div>
+      </div>
+      <div class="bubble" id="b1">散装变量像三张飘着的纸…</div>
+      <div class="stage" id="st1"></div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="r1">重来</button>
+      <button class="btn main" id="n1">下一步</button>
+    </div>
+    <div class="tip"><b>记住：</b>结构体不改变数据类型，只是把「相关的多个数据」打成一个包。</div>
+  </section>
+
+  <!-- S2 -->
+  <section id="s2" style="display:none">
+    <div class="story">
+      <strong>剧情：</strong>先画档案袋图纸（<code>struct Student</code>），再造实体档案（变量），
+      再往里填信息，最后用「点」<code>.</code> 取出来看。
+    </div>
+    <div class="theater">
+      <div class="cap" id="c2">点「下一步」，跟小明走完定义→创建→赋值→访问</div>
+      <div class="cast">
+        <div class="char" id="ch2">
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="28" r="16" fill="#fde68a" stroke="#b45309" stroke-width="2.5"/><circle cx="44" cy="27" r="2.2" fill="#1f2937"/><circle cx="56" cy="27" r="2.2" fill="#1f2937"/><path d="M44 34 q6 5 12 0" fill="none" stroke="#b45309" stroke-width="2"/><path d="M34 18 q16 -12 32 0" fill="#78350f"/><rect x="32" y="46" width="36" height="30" rx="10" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/><rect x="22" y="50" width="12" height="22" rx="5" fill="#fde68a" stroke="#b45309" stroke-width="2"/><rect x="66" y="50" width="12" height="22" rx="5" fill="#fde68a" stroke="#b45309" stroke-width="2"/></svg>
+          <div class="name">小明</div>
+        </div>
+      </div>
+      <div class="bubble" id="b2">先写图纸，再造实物～</div>
+      <div class="stage">
+        <div class="folder empty" id="fold">
+          <div class="tab-top">Student 档案袋</div>
+          <div class="body">
+            <div class="row"><div class="k">name</div><div class="v blank" id="vName">（空）</div></div>
+            <div class="row"><div class="k">id</div><div class="v blank" id="vId">（空）</div></div>
+            <div class="row"><div class="k">score</div><div class="v blank" id="vScore">（空）</div></div>
+          </div>
+        </div>
+        <div class="codebox" id="code2"></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="r2">重来</button>
+      <button class="btn main" id="n2">下一步</button>
+    </div>
+    <div class="tip"><b>易错：</b>成员用 <code>.</code> 访问；结构体变量名不要和类型名搞混（类型 <code>Student</code>，变量 <code>stu</code>）。</div>
+    <details class="adv">
+      <summary>进阶：完整最小示例</summary>
+      <pre>struct Student {
+    string name;
+    int id;
+    double score;
+};
+
+int main() {
+    Student stu;
+    stu.name = "小明";
+    stu.id = 1001;
+    stu.score = 92.5;
+    cout &lt;&lt; stu.name &lt;&lt; " " &lt;&lt; stu.score;
+}</pre>
+    </details>
+  </section>
+
+  <!-- S3 -->
+  <section id="s3" style="display:none">
+    <div class="story">
+      <strong>剧情：</strong>全班 3 个学生 = <code>Student a[3]</code>。
+      每个格子都是一份完整档案。下标取人，点号取字段：<code>a[i].score</code>。
+    </div>
+    <div class="theater">
+      <div class="cap" id="c3">点「下一步」，看结构体数组怎么存全班</div>
+      <div class="bubble" id="b3">数组的每个格子 = 一份完整档案</div>
+      <div class="stage">
+        <div class="cards" id="cards"></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="r3">重来</button>
+      <button class="btn main" id="n3">下一步</button>
+    </div>
+    <div class="tip"><b>套路：</b>输入 n 个学生 → 循环 cin 到 <code>a[i]</code> 各字段 → 再循环处理/输出。</div>
+    <details class="adv">
+      <summary>进阶：排序与函数传参</summary>
+      <pre>bool cmp(Student a, Student b) {
+    return a.score &gt; b.score;  // 按分数降序
+}
+sort(a, a + n, cmp);
+
+// 传结构体（拷贝）vs 传引用（可改）
+void show(const Student&amp; s) {
+    cout &lt;&lt; s.name &lt;&lt; " " &lt;&lt; s.score &lt;&lt; endl;
+}</pre>
+    </details>
+  </section>
+</div>
+
+<script>
+function jump(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('jump'); void el.offsetWidth; el.classList.add('jump');
+  setTimeout(() => el.classList.remove('jump'), 550);
+}
+
+/* ---- S1 ---- */
+const loose = [
+  { k: 'string name', v: '"小明"' },
+  { k: 'int id', v: '1001' },
+  { k: 'double score', v: '92.5' },
+];
+let i1 = 0;
+function r1() {
+  i1 = 0;
+  document.getElementById('b1').textContent = '散装变量像三张飘着的纸…';
+  document.getElementById('c1').innerHTML = '点「下一步」，看散装变量如何变成档案袋';
+  document.getElementById('st1').innerHTML = loose.map((x, i) =>
+    `<div class="mini" id="lo${i}"><b>${x.k}</b>${x.v}</div>`).join('');
+}
+function n1() {
+  if (i1 === 0) {
+    document.getElementById('b1').textContent = '它们各管各的，容易张冠李戴！';
+    document.getElementById('c1').innerHTML = '三个变量互不相关，传参要传三个';
+    i1++;
+  } else if (i1 === 1) {
+    jump('ch1');
+    document.getElementById('b1').textContent = '看我用结构体钉成一份档案！';
+    document.getElementById('c1').innerHTML = '<span class="ok">struct</span> 把相关字段绑成一个类型';
+    document.getElementById('st1').innerHTML = `
+      <div class="folder full">
+        <div class="tab-top">Student</div>
+        <div class="body">
+          <div class="row"><div class="k">name</div><div class="v hl">"小明"</div></div>
+          <div class="row"><div class="k">id</div><div class="v hl">1001</div></div>
+          <div class="row"><div class="k">score</div><div class="v hl">92.5</div></div>
+        </div>
+      </div>`;
+    i1++;
+  } else {
+    document.getElementById('b1').textContent = '以后传学生，只传一个 stu 就行～';
+    document.getElementById('c1').innerHTML = '这就是结构体的意义：相关数据打包';
+  }
+}
+document.getElementById('n1').onclick = n1;
+document.getElementById('r1').onclick = r1;
+
+/* ---- S2 ---- */
+const steps2 = [
+  {
+    cap: '① 定义类型：画档案袋图纸',
+    bubble: '只定义，还没有真正的袋子',
+    code: `<span class="k">struct</span> <span class="t">Student</span> {
+    <span class="t">string</span> name;
+    <span class="k">int</span> id;
+    <span class="k">double</span> score;
+};`,
+    folder: 'empty', fill: null
+  },
+  {
+    cap: '② 创建变量：造出一份空档案',
+    bubble: 'stu 是 Student 类型的变量',
+    code: `<span class="k">struct</span> <span class="t">Student</span> { ... };
+
+<span class="t">Student</span> stu;  <span class="c">// 空档案</span>`,
+    folder: 'empty', fill: null
+  },
+  {
+    cap: '③ 赋值：往格子里填信息',
+    bubble: '用「点」点开对应格子填进去',
+    code: `stu.name  = <span class="t">"小明"</span>;
+stu.id    = 1001;
+stu.score = 92.5;`,
+    folder: 'full', fill: { name: '"小明"', id: '1001', score: '92.5' }
+  },
+  {
+    cap: '④ 访问：用「点」把信息取出来',
+    bubble: 'cout << stu.name 就能打印',
+    code: `cout &lt;&lt; stu.name  &lt;&lt; endl;  <span class="c">// 小明</span>
+cout &lt;&lt; stu.score &lt;&lt; endl;  <span class="c">// 92.5</span>`,
+    folder: 'full', fill: { name: '"小明"', id: '1001', score: '92.5' }
+  },
+];
+let i2 = 0;
+function paint2(s) {
+  document.getElementById('c2').innerHTML = s.cap;
+  document.getElementById('b2').textContent = s.bubble;
+  document.getElementById('code2').innerHTML = s.code;
+  const f = document.getElementById('fold');
+  f.className = 'folder ' + s.folder;
+  const vals = s.fill || {};
+  for (const [id, key, blank] of [['vName','name','（空）'],['vId','id','（空）'],['vScore','score','（空）']]) {
+    const el = document.getElementById(id);
+    const has = vals[key] != null;
+    el.textContent = has ? vals[key] : blank;
+    el.className = 'v' + (has ? ' hl' : ' blank');
+  }
+}
+function r2() { i2 = 0; paint2(steps2[0]); }
+function n2() {
+  if (i2 < steps2.length - 1) { i2++; paint2(steps2[i2]); jump('ch2'); }
+}
+document.getElementById('n2').onclick = n2;
+document.getElementById('r2').onclick = r2;
+
+/* ---- S3 ---- */
+const classData = [
+  { name: '小明', id: 1001, score: 92.5 },
+  { name: '小红', id: 1002, score: 88 },
+  { name: '小刚', id: 1003, score: 95 },
+];
+let i3 = 0;
+function r3() {
+  i3 = 0;
+  document.getElementById('b3').textContent = '数组的每个格子 = 一份完整档案';
+  document.getElementById('c3').innerHTML = '点「下一步」，看结构体数组怎么存全班';
+  document.getElementById('cards').innerHTML = classData.map((s, i) =>
+    `<div class="mini" id="cd${i}"><b>a[${i}]</b>…</div>`).join('');
+}
+function n3() {
+  if (i3 < classData.length) {
+    const s = classData[i3];
+    document.getElementById('cd' + i3).innerHTML =
+      `<b>a[${i3}]</b>${s.name}<br>${s.id}<br>${s.score}`;
+    document.getElementById('cd' + i3).classList.add('hl');
+    document.getElementById('b3').textContent = `a[${i3}].name = ${s.name}，a[${i3}].score = ${s.score}`;
+    document.getElementById('c3').innerHTML = `存入第 <em>${i3+1}</em> 份档案（共 ${classData.length} 份）`;
+    i3++;
+  } else {
+    document.getElementById('b3').textContent = '循环：for(int i=0;i<n;i++) cin>>a[i].name…';
+    document.getElementById('c3').innerHTML = '<span class="ok">全班存完</span> · 可按 score 排序输出';
+  }
+}
+document.getElementById('n3').onclick = n3;
+document.getElementById('r3').onclick = r3;
+
+/* tabs */
+const tabs = [['t1','s1'],['t2','s2'],['t3','s3']];
+tabs.forEach(([tid, sid], idx) => {
+  document.getElementById(tid).onclick = () => {
+    tabs.forEach(([t, s], j) => {
+      document.getElementById(t).classList.toggle('on', j === idx);
+      document.getElementById(s).style.display = j === idx ? '' : 'none';
+    });
+  };
+});
+
+r1(); r2(); r3();
+</script>
+</body>
+</html>

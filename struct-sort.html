@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动画课堂 · 结构体数组排序</title>
+<style>
+  :root {
+    --paper: #f3efe6; --ink: #1f2937; --soft: #6b7280;
+    --blue: #2563eb; --orange: #ea580c; --green: #059669; --red: #dc2626;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background: radial-gradient(50% 40% at 50% 0%, #fde68a44, transparent), var(--paper);
+    color: var(--ink); min-height: 100vh; padding: 18px 14px 50px;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 12px; }
+  h1 { font-size: 25px; font-weight: 900; }
+  header p { color: var(--soft); font-size: 13.5px; margin-top: 4px; }
+  .tabs { display: flex; justify-content: center; gap: 6px; margin: 14px 0 14px; flex-wrap: wrap; }
+  .tab {
+    border: 2px solid #e7e5e4; background: #fff; padding: 10px 14px;
+    border-radius: 999px; font-size: 13.5px; font-weight: 800; color: var(--soft); cursor: pointer;
+  }
+  .tab.on { border-color: var(--blue); color: var(--blue); background: #eff6ff; }
+  .story {
+    background: #fff; border: 2px solid #e5e7eb; border-radius: 14px;
+    padding: 12px 14px; margin-bottom: 10px; font-size: 14.5px; line-height: 1.65;
+  }
+  .story strong { color: var(--blue); }
+  .theater {
+    background: #fffdf8; border: 3px solid #fcd34d; border-radius: 18px;
+    padding: 14px 12px 18px; min-height: 320px;
+  }
+  .cap {
+    text-align: center; font-size: 17px; font-weight: 800; line-height: 1.45;
+    min-height: 48px; margin-bottom: 8px;
+  }
+  .cap em { font-style: normal; color: var(--orange); }
+  .cap .ok { color: var(--green); }
+  .cast { display: flex; justify-content: center; gap: 16px; margin-bottom: 8px; }
+  .char { width: 72px; text-align: center; }
+  .char svg { width: 68px; height: 68px; }
+  .char .nm { font-size: 11px; font-weight: 800; color: var(--soft); }
+  .char.jump svg { animation: jump .5s ease; }
+  @keyframes jump { 0%,100%{transform:translateY(0)} 45%{transform:translateY(-12px) scale(1.06)} }
+  .bubble {
+    max-width: 320px; margin: 0 auto 12px; background: #fff; border: 2px solid #d6d3d1;
+    border-radius: 12px; padding: 8px 12px; font-size: 13.5px; font-weight: 700; text-align: center; min-height: 40px;
+  }
+  .stage { display: flex; flex-direction: column; align-items: center; gap: 12px; min-height: 200px; }
+
+  /* hero cards */
+  .row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .card {
+    width: 108px; background: #fff; border: 2.5px solid #93c5fd; border-radius: 12px;
+    padding: 8px; font-size: 12px; text-align: center; transition: all .35s ease;
+  }
+  .card b { display: block; color: var(--blue); font-size: 13px; margin-bottom: 2px; }
+  .card.hl { border-color: var(--red); transform: translateY(-8px) scale(1.05); box-shadow: 0 8px 18px rgba(220,38,38,.2); }
+  .card.done { border-color: var(--green); background: #ecfdf5; }
+  .card.swap { animation: shake .4s ease; border-color: var(--red); }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+  /* parallel arrays disaster */
+  .par { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+  .arr {
+    background: #fff; border: 2px dashed #fca5a5; border-radius: 12px; padding: 8px 10px; min-width: 140px;
+  }
+  .arr h4 { font-size: 12px; color: var(--red); margin-bottom: 4px; }
+  .arr .cells { display: flex; gap: 4px; }
+  .arr .c {
+    min-width: 36px; height: 32px; display: grid; place-items: center;
+    background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 6px;
+    font-family: Consolas, monospace; font-size: 12px; font-weight: 700;
+  }
+  .arr .c.miss { border-color: var(--red); background: #fee2e2; color: var(--red); }
+  .arr.ok { border-color: #6ee7b7; }
+  .arr.ok h4 { color: var(--green); }
+  .arr.ok .c { background: #ecfdf5; border-color: #6ee7b7; }
+
+  /* queue people */
+  .people { display: flex; gap: 10px; align-items: flex-end; justify-content: center; flex-wrap: wrap; }
+  .person {
+    width: 52px; text-align: center; font-size: 11px; font-weight: 700; color: var(--soft);
+    transition: all .35s;
+  }
+  .person .head {
+    width: 40px; height: 40px; margin: 0 auto 4px; border-radius: 50%;
+    background: linear-gradient(180deg,#fde68a,#f59e0b); border: 2px solid #b45309;
+    display: grid; place-items: center; font-size: 16px;
+  }
+  .person.vip .head { background: linear-gradient(180deg,#c4b5fd,#8b5cf6); border-color: #6d28d9; }
+  .person.cmp { transform: translateY(-10px); box-shadow: 0 0 0 3px #fbbf24; }
+  .person.picked { opacity: 1; }
+  .person.dim { opacity: .35; }
+
+  .controls { display: flex; justify-content: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .btn {
+    border: none; border-radius: 12px; padding: 11px 18px; font-size: 14px; font-weight: 900;
+    cursor: pointer; background: #e7e5e4; color: var(--ink); box-shadow: 0 3px 0 #d6d3d1;
+  }
+  .btn.main { background: var(--blue); color: #fff; box-shadow: 0 3px 0 #1d4ed8; }
+  .btn:active { transform: translateY(2px); box-shadow: none; }
+  .tip {
+    margin-top: 12px; padding: 11px 13px; border-radius: 12px;
+    background: #fef3c7; color: #92400e; font-size: 13px; line-height: 1.6;
+  }
+  details.adv { margin-top: 12px; border-top: 2px dashed #e5e7eb; padding-top: 10px; }
+  details.adv summary { cursor: pointer; font-weight: 800; color: var(--soft); font-size: 13.5px; }
+  details.adv pre {
+    margin-top: 8px; background: #1e293b; color: #e2e8f0; border-radius: 12px;
+    padding: 12px; font-size: 12px; font-family: Consolas, monospace; overflow: auto;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>动画角色课堂 · 结构体数组排序</h1>
+    <p>游乐场队伍 · 英雄卡 · 成绩表 · sort 与 cmp 裁判</p>
+  </header>
+  <div class="tabs">
+    <button class="tab on" id="t1">① 数组交换灾难</button>
+    <button class="tab" id="t2">② sort 排队</button>
+    <button class="tab" id="t3">③ cmp 裁判</button>
+    <button class="tab" id="t4">④ 成绩表排序</button>
+  </div>
+
+  <!-- S1 -->
+  <section id="s1">
+    <div class="story">
+      <strong>剧情：</strong>100 个英雄若用三个平行数组 names/hp/atk，交换两人要写三遍，
+      漏一个就错位。改成 <code>Hero a[100]</code> 后，<code>swap(a[i],a[j])</code> 一次搞定。
+    </div>
+    <div class="theater">
+      <div class="cap" id="c1">点「下一步」，看平行数组怎么出错</div>
+      <div class="cast">
+        <div class="char" id="ch1">
+          <svg viewBox="0 0 80 80"><circle cx="40" cy="22" r="14" fill="#fde68a" stroke="#b45309" stroke-width="2"/><circle cx="35" cy="21" r="2" fill="#1f2937"/><circle cx="45" cy="21" r="2" fill="#1f2937"/><rect x="24" y="38" width="32" height="28" rx="8" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/></svg>
+          <div class="nm">策划小明</div>
+        </div>
+      </div>
+      <div class="bubble" id="b1">要交换 1 号和 2 号英雄…</div>
+      <div class="stage" id="st1"></div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="r1">重来</button>
+      <button class="btn main" id="n1">下一步</button>
+    </div>
+    <div class="tip"><b>记住：</b>相关字段装进结构体数组，交换=整包搬家，不怕漏字段。</div>
+  </section>
+
+  <!-- S2 -->
+  <section id="s2" style="display:none">
+    <div class="story">
+      <strong>剧情：</strong>游乐场队伍乱糟糟。<code>sort</code> 像管理员：默认按「个子」从矮到高排（数值升序）。
+    </div>
+    <div class="theater">
+      <div class="cap" id="c2">点「下一步」，看 sort 如何变出秩序</div>
+      <div class="bubble" id="b2">乱队 → sort(a, a+n) → 有序</div>
+      <div class="stage">
+        <div class="people" id="queue2"></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="r2">重来</button>
+      <button class="btn main" id="n2">下一步</button>
+    </div>
+    <div class="tip"><b>语法：</b><code>#include &lt;algorithm&gt;</code> · <code>sort(a, a+n);</code> 默认升序。</div>
+    <details class="adv">
+      <summary>进阶：降序写法</summary>
+      <pre>int a[] = {3,1,4,2};
+sort(a, a+4);           // 1 2 3 4
+sort(a, a+4, greater&lt;int&gt;()); // 4 3 2 1</pre>
+    </details>
+  </section>
+
+  <!-- S3 -->
+  <section id="s3" style="display:none">
+    <div class="story">
+      <strong>剧情：</strong>今天活动：VIP 优先；VIP 等级相同则先来先排。
+      <code>sort</code> 默认不会，需要你写「专属裁判」<code>cmp</code>。
+    </div>
+    <div class="theater">
+      <div class="cap" id="c3">点「下一步」，看裁判如何定规则</div>
+      <div class="bubble" id="b3">cmp(a,b) 返回 true → a 排在 b 前面</div>
+      <div class="stage">
+        <div class="people" id="queue3"></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="r3">重来</button>
+      <button class="btn main" id="n3">下一步</button>
+    </div>
+    <div class="tip"><b>口诀：</b>return 条件为真 = 前者该排前面。多关键字：先比 VIP，再比到达序号。
+      想看<b>逐步裁判出牌</b>加长演示，打开 <a href="easy_vip.html" target="_blank" style="color:var(--blue);font-weight:800">easy_vip.html</a>。</div>
+    <details class="adv">
+      <summary>进阶：cmp 骨架</summary>
+      <pre>struct Person { int vip, arrive; };
+bool cmp(Person a, Person b) {
+    if (a.vip != b.vip) return a.vip &gt; b.vip; // VIP高优先
+    return a.arrive &lt; b.arrive;               // 先来先排
+}
+sort(p, p+n, cmp);</pre>
+    </details>
+  </section>
+
+  <!-- S4 -->
+  <section id="s4" style="display:none">
+    <div class="story">
+      <strong>剧情：</strong>P1502 成绩排序：读入 n 名学生（姓名/年龄/成绩），
+      按成绩从高到低输出完整成绩表。结构体打包 + 自写 cmp。
+    </div>
+    <div class="theater">
+      <div class="cap" id="c4">点「下一步」，跟小明排成绩表</div>
+      <div class="bubble" id="b4">按 score 降序，姓名年龄一起搬</div>
+      <div class="stage">
+        <div class="row" id="row4"></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="r4">重来</button>
+      <button class="btn main" id="n4">下一步</button>
+    </div>
+    <div class="tip"><b>套路：</b>定义 Student → 数组读入 → cmp 按 score 降序 → sort → 循环输出。</div>
+    <details class="adv">
+      <summary>进阶：完整 P1502 骨架</summary>
+      <pre>struct Student { string name; int age, score; } a[1005];
+
+bool cmp(Student x, Student y) {
+    return x.score &gt; y.score;  // 成绩高在前
+}
+
+int main() {
+    int n; cin &gt;&gt; n;
+    for (int i = 1; i &lt;= n; i++)
+        cin &gt;&gt; a[i].name &gt;&gt; a[i].age &gt;&gt; a[i].score;
+    sort(a+1, a+n+1, cmp);
+    for (int i = 1; i &lt;= n; i++)
+        cout &lt;&lt; a[i].name &lt;&lt; " " &lt;&lt; a[i].age &lt;&lt; " " &lt;&lt; a[i].score &lt;&lt; endl;
+}</pre>
+    </details>
+  </section>
+</div>
+
+<script>
+function jump(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('jump'); void el.offsetWidth; el.classList.add('jump');
+  setTimeout(() => el.classList.remove('jump'), 550);
+}
+
+/* ---- S1 parallel arrays vs struct ---- */
+const heroes = [
+  { name: '关羽', hp: 500, atk: 999 },
+  { name: '赵云', hp: 480, atk: 920 },
+];
+let i1 = 0;
+function r1() {
+  i1 = 0;
+  document.getElementById('b1').textContent = '要交换 1 号和 2 号英雄…';
+  document.getElementById('c1').innerHTML = '点「下一步」，看平行数组怎么出错';
+  document.getElementById('st1').innerHTML = `
+    <div class="par">
+      <div class="arr"><h4>names[2]</h4><div class="cells"><div class="c">关羽</div><div class="c">赵云</div></div></div>
+      <div class="arr"><h4>hp[2]</h4><div class="cells"><div class="c">500</div><div class="c">480</div></div></div>
+      <div class="arr"><h4>atk[2]</h4><div class="cells"><div class="c">999</div><div class="c">920</div></div></div>
+    </div>`;
+}
+function n1() {
+  if (i1 === 0) {
+    jump('ch1');
+    document.getElementById('b1').textContent = '交换 names… 成功。交换 hp… 成功。交换 atk… 漏了！';
+    document.getElementById('c1').innerHTML = '<span style="color:var(--red)">手滑漏交换 → 数据错位</span>';
+    document.getElementById('st1').innerHTML = `
+      <div class="par">
+        <div class="arr ok"><h4>names 已换</h4><div class="cells"><div class="c">赵云</div><div class="c">关羽</div></div></div>
+        <div class="arr ok"><h4>hp 已换</h4><div class="cells"><div class="c">480</div><div class="c">500</div></div></div>
+        <div class="arr"><h4>atk 忘了换</h4><div class="cells"><div class="c miss">999</div><div class="c miss">920</div></div></div>
+      </div>`;
+    i1++;
+  } else if (i1 === 1) {
+    document.getElementById('b1').textContent = '结构体数组：swap(a[0], a[1]) 整包搬家！';
+    document.getElementById('c1').innerHTML = '<span class="ok">Hero a[2] · 一次交换</span>';
+    document.getElementById('st1').innerHTML = `
+      <div class="row">
+        <div class="card done"><b>a[0] 赵云</b>HP 480<br>ATK 920</div>
+        <div class="card done"><b>a[1] 关羽</b>HP 500<br>ATK 999</div>
+      </div>`;
+    i1++;
+  } else {
+    document.getElementById('b1').textContent = '所有字段自动一起走，不再漏交换～';
+    document.getElementById('c1').innerHTML = '这就是用结构体数组的原因';
+  }
+}
+document.getElementById('n1').onclick = n1; document.getElementById('r1').onclick = r1;
+
+/* ---- S2 sort default ---- */
+const h2 = [3, 1, 4, 2, 5];
+let i2 = 0;
+function r2() {
+  i2 = 0;
+  const q = h2.slice();
+  document.getElementById('queue2').innerHTML = q.map((v, i) =>
+    `<div class="person" id="p2${i}"><div class="head" style="height:${28+v*8}px"></div>${v}</div>`).join('');
+  document.getElementById('b2').textContent = '乱队 → sort(a, a+n) → 有序';
+  document.getElementById('c2').innerHTML = '点「下一步」，看 sort 如何变出秩序';
+}
+function n2() {
+  const sorted = [...h2].sort((a,b)=>a-b);
+  if (i2 === 0) {
+    document.getElementById('b2').textContent = 'sort 默认：从小到大（矮个在前）';
+    document.getElementById('c2').innerHTML = '管理员开始排序…';
+    i2++;
+  } else {
+    document.getElementById('queue2').innerHTML = sorted.map((v, i) =>
+      `<div class="person picked" id="p2${i}"><div class="head" style="height:${28+v*8}px"></div>${v}</div>`).join('');
+    document.getElementById('b2').textContent = '结果：1 2 3 4 5';
+    document.getElementById('c2').innerHTML = '<span class="ok">默认升序完成</span> · sort(a,a+n)';
+  }
+}
+document.getElementById('n2').onclick = n2; document.getElementById('r2').onclick = r2;
+
+/* ---- S3 cmp referee ---- */
+const people3 = [
+  { vip: 1, arrive: 2, emoji: '👸' },
+  { vip: 0, arrive: 1, emoji: '👦' },
+  { vip: 2, arrive: 3, emoji: '👑' },
+  { vip: 0, arrive: 4, emoji: '👧' },
+  { vip: 2, arrive: 5, emoji: '⭐' },
+];
+let i3 = 0;
+function r3() {
+  i3 = 0;
+  document.getElementById('queue3').innerHTML = people3.map((p, i) =>
+    `<div class="person ${p.vip>=2?'vip':''}" id="p3${i}"><div class="head">${p.emoji}</div>V${p.vip}<br>#${p.arrive}</div>`).join('');
+  document.getElementById('b3').textContent = 'cmp(a,b) 返回 true → a 排在 b 前面';
+  document.getElementById('c3').innerHTML = '点「下一步」，看裁判如何定规则';
+}
+function n3() {
+  const sorted = [...people3].sort((a,b) => b.vip - a.vip || a.arrive - b.arrive);
+  if (i3 === 0) {
+    document.getElementById('b3').textContent = '规则：先比 VIP（高优先），再比到达序号（小优先）';
+    document.getElementById('c3').innerHTML = '裁判举牌：VIP 2 → VIP 1 → VIP 0';
+    i3++;
+  } else {
+    document.getElementById('queue3').innerHTML = sorted.map((p, i) =>
+      `<div class="person picked ${p.vip>=2?'vip':''}" id="p3${i}"><div class="head">${p.emoji}</div>V${p.vip}<br>#${p.arrive}</div>`).join('');
+    document.getElementById('b3').textContent = '👑#3 → ⭐#5 → 👸#2 → 👦#1 → 👧#4';
+    document.getElementById('c3').innerHTML = '<span class="ok">自定义 cmp 排序完成</span>';
+  }
+}
+document.getElementById('n3').onclick = n3; document.getElementById('r3').onclick = r3;
+
+/* ---- S4 score table ---- */
+const studs = [
+  { name: '小明', age: 14, score: 88 },
+  { name: '小红', age: 15, score: 95 },
+  { name: '小刚', age: 14, score: 72 },
+  { name: '小丽', age: 15, score: 91 },
+];
+let i4 = 0;
+function r4() {
+  i4 = 0;
+  document.getElementById('row4').innerHTML = studs.map((s, i) =>
+    `<div class="card" id="c4${i}"><b>${s.name}</b>年龄 ${s.age}<br>成绩 ${s.score}</div>`).join('');
+  document.getElementById('b4').textContent = '按 score 降序，姓名年龄一起搬';
+  document.getElementById('c4').innerHTML = '点「下一步」，跟小明排成绩表';
+}
+function n4() {
+  const sorted = [...studs].sort((a,b)=>b.score-a.score);
+  if (i4 === 0) {
+    document.getElementById('b4').textContent = 'cmp：return x.score > y.score';
+    document.getElementById('c4').innerHTML = 'sort 开始比较成绩…';
+    jump('ch1');
+    i4++;
+  } else {
+    document.getElementById('row4').innerHTML = sorted.map((s, i) =>
+      `<div class="card done" id="c4${i}"><b>${s.name}</b>年龄 ${s.age}<br>成绩 ${s.score}</div>`).join('');
+    document.getElementById('b4').textContent = '小红95 → 小丽91 → 小明88 → 小刚72';
+    document.getElementById('c4').innerHTML = '<span class="ok">成绩表按分数降序</span>';
+  }
+}
+document.getElementById('n4').onclick = n4; document.getElementById('r4').onclick = r4;
+
+/* tabs */
+[['t1','s1'],['t2','s2'],['t3','s3'],['t4','s4']].forEach(([tid,sid], idx) => {
+  document.getElementById(tid).onclick = () => {
+    [['t1','s1'],['t2','s2'],['t3','s3'],['t4','s4']].forEach(([t,s], j) => {
+      document.getElementById(t).classList.toggle('on', j===idx);
+      document.getElementById(s).style.display = j===idx ? '' : 'none';
+    });
+  };
+});
+r1(); r2(); r3(); r4();
+</script>
+</body>
+</html>
