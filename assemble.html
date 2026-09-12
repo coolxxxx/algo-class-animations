@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>代码拼装器 · 概念如何变成完整程序</title>
+<style>
+  :root {
+    --bg:#0f1419; --panel:#1a222c; --line:#2e3d4f;
+    --ink:#e8eef5; --soft:#8b9aab; --cy:#4cc2ff; --am:#ff9f43; --gn:#3dd68c; --rd:#ff6b6b;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    background:var(--bg); color:var(--ink); min-height:100vh; padding:18px 14px 40px;
+  }
+  .wrap { max-width:1080px; margin:0 auto; }
+  header { text-align:center; margin-bottom:14px; }
+  h1 { font-size:24px; font-weight:900; }
+  .sub { color:var(--soft); font-size:13.5px; margin-top:5px; line-height:1.6; }
+
+  .tabs { display:flex; justify-content:center; gap:8px; margin:14px 0; flex-wrap:wrap; }
+  .tab {
+    border:2px solid var(--line); background:var(--panel); color:var(--soft);
+    padding:10px 16px; border-radius:999px; font-size:14px; font-weight:800; cursor:pointer;
+  }
+  .tab.on { border-color:var(--cy); color:var(--cy); background:rgba(34,211,238,.08); }
+
+  .layout { display:grid; grid-template-columns:280px 1fr; gap:14px; }
+  @media (max-width:900px) { .layout { grid-template-columns:1fr; } }
+
+  .pieces {
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:12px;
+  }
+  .pieces h3 { font-size:13px; color:var(--soft); margin-bottom:8px; letter-spacing:.04em; }
+  .piece {
+    display:block; width:100%; text-align:left; margin-bottom:8px;
+    background:rgba(126,164,222,.08); border:1px solid var(--line); color:var(--ink);
+    border-radius:10px; padding:10px 12px; cursor:pointer; font-size:13px; line-height:1.45;
+  }
+  .piece b { display:block; color:var(--cy); font-size:13.5px; margin-bottom:2px; }
+  .piece:hover { border-color:var(--cy); }
+  .piece.on {
+    background:rgba(245,166,35,.15); border-color:var(--am); box-shadow:0 0 0 2px rgba(245,166,35,.25);
+  }
+  .piece .why { color:var(--soft); font-size:12px; margin-top:3px; }
+
+  .main {
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:14px; display:flex; flex-direction:column; gap:10px; min-height:420px;
+  }
+  .narr {
+    background:rgba(245,166,35,.1); border-left:3px solid var(--am);
+    border-radius:0 10px 10px 0; padding:10px 12px; font-size:13.5px; line-height:1.65; color:#ffe9c2;
+  }
+  pre.code {
+    background:#0a1322; border-radius:12px; padding:14px 14px 14px 52px;
+    font-family:Consolas,"Cascadia Code",monospace; font-size:13px; line-height:1.55;
+    overflow:auto; max-height:520px; color:#c6d4ea; position:relative;
+    white-space:pre; counter-reset:ln;
+  }
+  pre.code .L { display:block; min-height:1.55em; }
+  pre.code .L::before {
+    content:counter(ln); counter-increment:ln;
+    position:absolute; left:0; width:2.2em; margin-left:0; color:#3b4d69; text-align:right;
+  }
+  pre.code .L.hl {
+    background:rgba(245,166,35,.16);
+    box-shadow:inset 3px 0 0 var(--am);
+    border-radius:3px;
+  }
+  pre.code .k { color:#7dd3fc; font-weight:600; }
+  pre.code .t { color:#f9a8d4; }
+  pre.code .c { color:#64748b; font-style:italic; }
+  pre.code .s { color:#86efac; }
+  pre.code .n { color:#fdba74; }
+
+  .flow {
+    display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin:4px 0 2px;
+  }
+  .node {
+    background:rgba(126,164,222,.1); border:1px solid var(--line); border-radius:8px;
+    padding:6px 10px; font-size:12px; font-weight:700; color:var(--soft);
+  }
+  .node.on { background:rgba(61,214,140,.15); border-color:var(--gn); color:var(--gn); }
+  .arr { color:var(--soft); align-self:center; font-weight:900; }
+
+  .tip {
+    margin-top:12px; background:rgba(52,211,153,.08); border:1px solid rgba(52,211,153,.25);
+    border-radius:12px; padding:12px 14px; font-size:13px; color:#a7f3d0; line-height:1.65;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>代码拼装器 · 概念如何变成完整程序</h1>
+    <div class="sub">
+      问题：单独看每一段都懂，拼在一起就懵。<br/>
+      点左边「积木」→ 右边整段代码对应行高亮 + 讲清它在完整程序里干什么。
+    </div>
+  </header>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="layout">
+    <div class="pieces">
+      <h3>积木清单（点一下看它在程序里的位置）</h3>
+      <div id="pieceList"></div>
+    </div>
+    <div class="main">
+      <div class="flow" id="flow"></div>
+      <div class="narr" id="narr">选一块积木，看它如何嵌进完整代码。</div>
+      <pre class="code" id="code"></pre>
+    </div>
+  </div>
+
+  <div class="tip">
+    <b>读整段代码的方法：</b>先找 <span style="color:#7dd3fc">main</span> 从哪行开始 →
+    再按执行顺序扫：输入 → 处理（定义/调用/循环）→ 输出。
+    函数和结构体定义可以「先跳过，用到再回来看」。积木顺序 = 书写顺序，不等于执行顺序。
+  </div>
+</div>
+
+<script>
+/* ===== 每个案例：lines = 源码行；pieces = 可点积木 ===== */
+const CASES = {
+  "struct-score": {
+    title: "成绩表排序（结构体+cmp+sort）",
+    pieces: [
+      { id:"include", name:"① 头文件", why:"sort 在 <algorithm>；string 在 bits/stdc++.h", lines:[0,1,2], when:"程序启动前，先装工具" },
+      { id:"struct", name:"② 结构体定义", why:"画档案袋图纸：姓名/年龄/成绩", lines:[4,5,6,7,8,9], when:"类型定义，还不产生变量" },
+      { id:"cmp", name:"③ cmp 裁判", why:"告诉 sort 谁该排前面", lines:[11,12,13], when:"sort 内部会反复调用它" },
+      { id:"arr", name:"④ 数组", why:"1000 份档案袋的柜子", lines:[15], when:"全局/静态区分配空间" },
+      { id:"input", name:"⑤ 输入 n 与循环读入", why:"cin 到每个 a[i] 的字段", lines:[17,18,19,20], when:"main 从上往下执行到此" },
+      { id:"sort", name:"⑥ sort 调用", why:"真正排的地方，内部用 cmp", lines:[22], when:"O(n log n)，块内是黑盒" },
+      { id:"output", name:"⑦ 输出成绩表", why:"循环打印每个 a[i]", lines:[24,25,26], when:"排完后执行" },
+    ],
+    lines: [
+      '#include <bits/stdc++.h>',
+      'using namespace std;',
+      '',
+      '// —— ① 定义类型：还不是变量 ——',
+      'struct Student {',
+      '    string name;',
+      '    int age, score;',
+      '};',
+      '',
+      '// —— ② 裁判：sort 会反复问它 ——',
+      'bool cmp(Student x, Student y) {',
+      '    return x.score > y.score;   // 成绩高在前',
+      '}',
+      '',
+      'Student a[1005];               // ③ 柜子：装很多份档案',
+      '',
+      'int main() {',
+      '    int n;',
+      '    cin >> n;',
+      '    for (int i = 1; i <= n; i++)          // ④ 读入',
+      '        cin >> a[i].name >> a[i].age >> a[i].score;',
+      '',
+      '    sort(a + 1, a + n + 1, cmp);           // ⑤ 排序（内部用 cmp）',
+      '',
+      '    for (int i = 1; i <= n; i++)          // ⑥ 输出',
+      '        cout << a[i].name << " " << a[i].score << endl;',
+      '    return 0;',
+      '}',
+    ],
+    flow: ["定义类型","写 cmp","开数组","输入","sort","输出"],
+  },
+
+  "merge-sort": {
+    title: "归并排序（分治三段）",
+    pieces: [
+      { id:"merge", name:"① merge 合并", why:"双指针谁小取谁——治", lines:[3,4,5,6,7,8,9,10,11,12], when:"被 mergeSort 在递归返回时调用" },
+      { id:"ms", name:"② mergeSort 递归", why:"分：拆半；合：调 merge", lines:[14,15,16,17,18,19,20,21], when:"先拆到底，再归上来" },
+      { id:"main", name:"③ main 调用", why:"入口只调一次 mergeSort", lines:[23,24,25,26,27,28,29], when:"程序从这里开始" },
+    ],
+    lines: [
+      '#include <bits/stdc++.h>',
+      'using namespace std;',
+      '',
+      'void merge(vector<int>& a, vector<int>& tmp, int lo, int mid, int hi) {',
+      '    int i = lo, j = mid, k = lo;',
+      '    while (i < mid && j < hi) {',
+      '        if (a[i] <= a[j]) tmp[k++] = a[i++];  // 谁小取谁',
+      '        else              tmp[k++] = a[j++];',
+      '    }',
+      '    while (i < mid) tmp[k++] = a[i++];',
+      '    while (j < hi)  tmp[k++] = a[j++];',
+      '    for (int t = lo; t < hi; ++t) a[t] = tmp[t];',
+      '}',
+      '',
+      'void mergeSort(vector<int>& a, vector<int>& tmp, int lo, int hi) {',
+      '    if (hi - lo <= 1) return;          // 终止：单元素',
+      '    int mid = lo + (hi - lo) / 2;      // 分',
+      '    mergeSort(a, tmp, lo, mid);',
+      '    mergeSort(a, tmp, mid, hi);',
+      '    merge(a, tmp, lo, mid, hi);        // 合',
+      '}',
+      '',
+      'int main() {',
+      '    vector<int> a = {38,27,43,3,9,82,10};',
+      '    vector<int> tmp(a.size());',
+      '    mergeSort(a, tmp, 0, (int)a.size());',
+      '    for (int x : a) cout << x << " ";',
+      '}',
+    ],
+    flow: ["定义 merge","定义 mergeSort","main 调用一次","递归拆","归并合"],
+  },
+
+  "vip-sort": {
+    title: "多关键字 VIP 排序",
+    pieces: [
+      { id:"st", name:"① Person 结构体", why:"vip + arrive 两个关键字", lines:[3,4,5,6,7], when:"先定类型" },
+      { id:"cmp", name:"② 两级 cmp", why:"先比 VIP；相同再比到达", lines:[9,10,11,12,13], when:"sort 每次比较都走这里" },
+      { id:"in", name:"③ 输入", why:"读 n 个人", lines:[16,17,18,19], when:"main 执行" },
+      { id:"so", name:"④ sort", why:"应用两级规则", lines:[21], when:"排完即可输出" },
+    ],
+    lines: [
+      '#include <bits/stdc++.h>',
+      'using namespace std;',
+      '',
+      'struct Person {',
+      '    int vip, arrive;',
+      '    string name;',
+      '};',
+      '',
+      'bool cmp(Person a, Person b) {',
+      '    if (a.vip != b.vip) return a.vip > b.vip;  // ① VIP 高优先',
+      '    return a.arrive < b.arrive;                // ② 同级先来先排',
+      '}',
+      '',
+      'Person p[105];',
+      '',
+      'int main() {',
+      '    int n; cin >> n;',
+      '    for (int i = 1; i <= n; i++)',
+      '        cin >> p[i].vip >> p[i].arrive >> p[i].name;',
+      '',
+      '    sort(p + 1, p + n + 1, cmp);',
+      '',
+      '    for (int i = 1; i <= n; i++)',
+      '        cout << p[i].name << " ";',
+      '}',
+    ],
+    flow: ["定义 Person","两级 cmp","输入","sort","输出"],
+  },
+
+  "activity": {
+    title: "活动选择（贪心）",
+    pieces: [
+      { id:"st", name:"① Act 结构体", why:"开始/结束时间", lines:[3,4,5], when:"打包字段" },
+      { id:"cmp", name:"② cmp 按结束时间", why:"结束早优先", lines:[7,8,9], when:"sort 用" },
+      { id:"in", name:"③ 输入", why:"读 n 个活动", lines:[12,13,14,15], when:"main" },
+      { id:"so", name:"④ sort", why:"先按结束时间排", lines:[17], when:"贪心前提" },
+      { id:"greedy", name:"⑤ 贪心扫描", why:"能接上就选，更新 lastEnd", lines:[19,20,21,22,23,24,25,26], when:"排完后 O(n) 扫" },
+    ],
+    lines: [
+      '#include <bits/stdc++.h>',
+      'using namespace std;',
+      '',
+      'struct Act { int s, e; };',
+      '',
+      'bool cmp(Act a, Act b) { return a.e < b.e; }',
+      '',
+      'Act a[105];',
+      '',
+      'int main() {',
+      '    int n; cin >> n;',
+      '    for (int i = 1; i <= n; i++)',
+      '        cin >> a[i].s >> a[i].e;',
+      '',
+      '    sort(a + 1, a + n + 1, cmp);',
+      '',
+      '    int cnt = 0, lastEnd = 0;',
+      '    for (int i = 1; i <= n; i++) {',
+      '        if (a[i].s >= lastEnd) {   // 能接上就选',
+      '            cnt++;',
+      '            lastEnd = a[i].e;',
+      '        }',
+      '    }',
+      '    cout << cnt << endl;',
+      '}',
+    ],
+    flow: ["定义 Act","cmp 结束早","输入","sort","贪心扫描"],
+  },
+};
+
+let cur = "struct-score";
+let curPiece = null;
+
+const $ = (id) => document.getElementById(id);
+
+function esc(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function paintCode(c, highlightLines) {
+  const el = $("code");
+  el.innerHTML = c.lines.map((ln, i) => {
+    // very light syntax paint
+    let h = esc(ln)
+      .replace(/\b(struct|bool|int|void|return|if|else|for|while|using|namespace|include|string|vector|sort|cin|cout|endl|true)\b/g,
+               '<span class="k">$1</span>');
+    const on = highlightLines && highlightLines.includes(i);
+    return `<span class="L${on?' hl':''}">${h||' '}</span>`;
+  }).join('');
+}
+
+function render() {
+  const c = CASES[cur];
+  $("tabs").innerHTML = Object.keys(CASES).map(k =>
+    `<button class="tab${k===cur?' on':''}" data-k="${k}">${c.short||CASES[k].title.split('（')[0]}</button>`
+  ).join('');
+  // shorter labels
+  const labels = { "struct-score":"成绩表排序", "merge-sort":"归并排序", "vip-sort":"VIP多关键字", "activity":"活动选择" };
+  $("tabs").innerHTML = Object.keys(CASES).map(k =>
+    `<button class="tab${k===cur?' on':''}" data-k="${k}">${labels[k]}</button>`
+  ).join('');
+  $("tabs").querySelectorAll(".tab").forEach(b => {
+    b.onclick = () => { cur = b.dataset.k; curPiece = null; render(); };
+  });
+
+  $("pieceList").innerHTML = c.pieces.map(p =>
+    `<button class="piece${curPiece===p.id?' on':''}" data-id="${p.id}">
+      <b>${p.name}</b><span class="why">${p.why}</span>
+    </button>`
+  ).join('');
+  $("pieceList").querySelectorAll(".piece").forEach(b => {
+    b.onclick = () => { curPiece = b.dataset.id; render(); };
+  });
+
+  $("flow").innerHTML = c.flow.map((f,i) =>
+    (i? '<span class="arr">→</span>':'') + `<span class="node">${f}</span>`
+  ).join('');
+
+  const p = c.pieces.find(x => x.id === curPiece);
+  if (p) {
+    $("narr").innerHTML = `<b>${p.name}</b>　${p.why}<br/><span style="color:#8b9aab">何时起作用：${p.when}</span>`;
+    // highlight piece lines + mark flow roughly
+    const nodes = $("flow").querySelectorAll(".node");
+    const fi = c.pieces.indexOf(p);
+    nodes.forEach((n,i) => n.classList.toggle("on", i === Math.min(fi, c.flow.length-1)));
+  } else {
+    $("narr").textContent = "点左边积木，看它嵌在完整程序哪几行。";
+    $("flow").querySelectorAll(".node").forEach(n => n.classList.remove("on"));
+  }
+  paintCode(c, p ? p.lines : null);
+  // scroll first highlight into view
+  if (p && p.lines.length) {
+    const first = $("code").querySelector(".L.hl");
+    if (first) first.scrollIntoView({ block:"nearest" });
+  }
+}
+
+render();
+</script>
+</body>
+</html>
