@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动画课堂 · 递推 vs 递归（Python & C++）</title>
+<style>
+  :root {
+    --paper:#f3efe6; --ink:#1f2937; --soft:#6b7280;
+    --blue:#2563eb; --orange:#ea580c; --green:#059669; --red:#dc2626; --purple:#7c3aed;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    background: radial-gradient(50% 40% at 50% 0%, #fde68a44, transparent), var(--paper);
+    color:var(--ink); min-height:100vh; padding:18px 14px 48px;
+  }
+  .wrap { max-width:1020px; margin:0 auto; }
+  header { text-align:center; margin-bottom:12px; }
+  h1 { font-size:23px; font-weight:900; }
+  header p { color:var(--soft); font-size:13.5px; margin-top:4px; line-height:1.5; }
+  .tabs { display:flex; justify-content:center; gap:8px; margin:12px 0; flex-wrap:wrap; }
+  .tab {
+    border:2px solid #e7e5e4; background:#fff; padding:10px 16px;
+    border-radius:999px; font-size:14px; font-weight:800; color:var(--soft); cursor:pointer;
+  }
+  .tab.on { border-color:var(--blue); color:var(--blue); background:#eff6ff; }
+  .tab.on.g { border-color:var(--green); color:#047857; background:#ecfdf5; }
+  .story {
+    background:#fff; border:2px solid #e5e7eb; border-radius:14px;
+    padding:12px 14px; margin-bottom:10px; font-size:14.5px; line-height:1.7;
+  }
+  .story strong { color:var(--blue); }
+  .theater {
+    background:#fffdf8; border:3px solid #fcd34d; border-radius:18px;
+    padding:14px 12px 18px;
+  }
+  .cap {
+    text-align:center; font-size:17px; font-weight:800; line-height:1.45;
+    min-height:48px; margin-bottom:6px;
+  }
+  .cap em { font-style:normal; color:var(--orange); }
+  .cap .ok { color:var(--green); }
+  .bubble {
+    max-width:560px; margin:0 auto 10px; background:#fff; border:2px solid #d6d3d1;
+    border-radius:12px; padding:8px 12px; font-size:13.5px; font-weight:700;
+    text-align:center; min-height:40px;
+  }
+  .two {
+    display:grid; grid-template-columns:1fr 1fr; gap:12px;
+  }
+  @media (max-width:800px){ .two{ grid-template-columns:1fr; } }
+  .panel {
+    background:#fff; border:2px solid #e5e7eb; border-radius:14px; padding:12px;
+  }
+  .panel h3 { font-size:14px; font-weight:900; margin-bottom:8px; }
+  .panel.rec h3 { color:var(--purple); }
+  .panel.iter h3 { color:var(--green); }
+  .stack, .rowarr { display:flex; flex-direction:column; gap:6px; min-height:160px; justify-content:flex-end; }
+  .rowarr { flex-direction:row; align-items:flex-end; justify-content:center; flex-wrap:wrap; gap:8px; min-height:100px; }
+  .box {
+    min-width:72px; padding:8px 10px; border-radius:10px; text-align:center;
+    font-family:Consolas,monospace; font-size:14px; font-weight:800;
+    border:2px solid #d1d5db; background:#fff; transition:all .25s;
+  }
+  .box.hl { border-color:var(--orange); background:#fff7ed; transform:scale(1.05); }
+  .box.done { border-color:var(--green); background:#ecfdf5; }
+  .box.dim { opacity:.35; }
+  .box.big { min-width:88px; font-size:17px; }
+  .lang {
+    display:flex; gap:6px; margin:10px 0 6px; justify-content:center;
+  }
+  .lang button {
+    border:1px solid var(--line,#e5e7eb); background:#f8fafc; border-radius:8px;
+    padding:6px 14px; font-size:12px; font-weight:800; cursor:pointer; color:var(--soft);
+  }
+  .lang button.on { background:#0f172a; color:#fff; border-color:#0f172a; }
+  .code {
+    margin-top:6px; background:#0f172a; color:#e2e8f0; border-radius:12px;
+    padding:12px; font-family:Consolas,monospace; font-size:12.5px; line-height:1.5; overflow:auto;
+    white-space:pre;
+  }
+  .code .k { color:#7dd3fc; }
+  .code .t { color:#f9a8d4; }
+  .code .c { color:#64748b; }
+  .code .s { color:#86efac; }
+  .controls { display:flex; justify-content:center; gap:10px; margin-top:14px; flex-wrap:wrap; }
+  .btn {
+    border:none; border-radius:12px; padding:11px 18px; font-size:14px; font-weight:900;
+    cursor:pointer; background:#e7e5e4; color:var(--ink); box-shadow:0 3px 0 #d6d3d1;
+  }
+  .btn.main { background:var(--blue); color:#fff; box-shadow:0 3px 0 #1d4ed8; }
+  .btn.main.g { background:var(--green); box-shadow:0 3px 0 #047857; }
+  .btn:active { transform:translateY(2px); box-shadow:none; }
+  .tip {
+    margin-top:12px; padding:11px 13px; border-radius:12px;
+    background:#fef3c7; color:#92400e; font-size:13px; line-height:1.65;
+  }
+  table.cmp {
+    width:100%; border-collapse:collapse; margin-top:8px; font-size:13px; background:#fff;
+    border-radius:12px; overflow:hidden;
+  }
+  table.cmp th, table.cmp td { border:1px solid #e5e7eb; padding:8px 10px; text-align:left; }
+  table.cmp th { background:#f8fafc; font-weight:800; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>动画课堂 · 递推 vs 递归</h1>
+    <p>同一道题：爬楼梯 f(n)=f(n-1)+f(n-2)。递归向下问再归；递推从小往大填表。<br/>附 <b>Python</b> 与 <b>C++</b> 对照示例。</p>
+  </header>
+  <div class="tabs">
+    <button class="tab on" id="t1">① 递归：问下去再答</button>
+    <button class="tab g" id="t2">② 递推：从小到大填表</button>
+    <button class="tab" id="t3">③ 双语言代码</button>
+    <button class="tab" id="t4">④ 怎么选</button>
+  </div>
+
+  <!-- S1 -->
+  <section id="s1">
+    <div class="story">
+      <strong>剧情：</strong>要求 f(6)。递归像下级问上级：先问 f(5)，f(5) 再问 f(4)……
+      问到 f(1)、f(2) 出口后，答案一层层带回来。中间可能<strong>重复问同一个人</strong>。
+    </div>
+    <div class="theater">
+      <div class="cap" id="c1">点「下一步」，看递归怎么问</div>
+      <div class="bubble" id="b1">f(n) = f(n-1) + f(n-2)</div>
+      <div class="two">
+        <div class="panel rec">
+          <h3>调用栈（问下去）</h3>
+          <div class="stack" id="stack1"></div>
+        </div>
+        <div class="panel">
+          <h3>已算 / 待算</h3>
+          <div id="memo1" style="font-size:13px;line-height:1.8;font-family:Consolas,monospace;min-height:80px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="r1">重来</button>
+      <button class="btn main" id="n1">下一步</button>
+    </div>
+    <div class="tip"><b>问题：</b>f(3) 可能被问很多次——重复计算，n 大时会很慢甚至爆栈。</div>
+  </section>
+
+  <!-- S2 -->
+  <section id="s2" style="display:none">
+    <div class="story">
+      <strong>剧情：</strong>还是求 f(6)。递推像记账：先记好 f(1)=1、f(2)=1，
+      再<strong>从左到右</strong>用前两项推出下一项，一直填到 f(6)。不回头问，也不重复算。
+    </div>
+    <div class="theater">
+      <div class="cap" id="c2">点「下一步」，看表怎么一格格填满</div>
+      <div class="bubble" id="b2">dp[i] = dp[i-1] + dp[i-2]</div>
+      <div class="panel iter">
+        <h3>dp 表（从小到大）</h3>
+        <div class="rowarr" id="dp2"></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="r2">重来</button>
+      <button class="btn main g" id="n2">下一步</button>
+    </div>
+    <div class="tip"><b>优势：</b>每个下标只算一次，时间 O(n)，没有递归栈爆掉的风险。</div>
+  </section>
+
+  <!-- S3 code both langs -->
+  <section id="s3" style="display:none">
+    <div class="story">
+      <strong>同一公式，两种写法。</strong>切换语言看完整可运行示例。递归：函数调自己；递推：循环填数组。
+    </div>
+    <div class="theater">
+      <div class="cap">Python / C++ 对照 · 爬楼梯 f(n)=f(n-1)+f(n-2)</div>
+      <div class="lang">
+        <button class="on" data-lang="cpp">C++</button>
+        <button data-lang="py">Python</button>
+      </div>
+      <div class="two">
+        <div class="panel rec">
+          <h3>递归写法</h3>
+          <pre class="code" id="codeRec"></pre>
+        </div>
+        <div class="panel iter">
+          <h3>递推写法</h3>
+          <pre class="code" id="codeIter"></pre>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" onclick="alert('可复制两侧代码到 IDE 运行 n=6 → 8')">提示：试运行 n=6</button>
+    </div>
+    <div class="tip"><b>注意：</b>Python 有默认递归深度限制；C++ 栈空间也有限，n 很大时优先递推。</div>
+  </section>
+
+  <!-- S4 compare -->
+  <section id="s4" style="display:none">
+    <div class="story">
+      <strong>怎么选：</strong>能写成「用前面结果推出当前」→ 优先递推/循环；
+      问题天然分叉、结构是树 → 递归更直观。很多题可以互相改写。
+    </div>
+    <div class="theater">
+      <table class="cmp">
+        <tr><th></th><th>递归</th><th>递推</th></tr>
+        <tr><td>方向</td><td>从大到小问，再归</td><td>从小到大填</td></tr>
+        <tr><td>出口/边界</td><td>if n&lt;=2 return 1</td><td>dp[1]=1, dp[2]=1</td></tr>
+        <tr><td>核心</td><td>f(n) 调自己</td><td>dp[i]=dp[i-1]+dp[i-2]</td></tr>
+        <tr><td>风险</td><td>重复算、爆栈</td><td>要开数组、想清顺序</td></tr>
+        <tr><td>适合</td><td>树形、分治、汉诺塔</td><td>爬楼梯、斐波那契、前缀和</td></tr>
+        <tr><td>Python 递归</td><td>默认深度约 1000，可 sys.setrecursionlimit</td><td>无栈限制（受内存）</td></tr>
+        <tr><td>C++ 递归</td><td>栈空间有限，深递归危险</td><td>数组循环，安全快</td></tr>
+      </table>
+    </div>
+    <div class="tip"><b>口诀：</b>递归会问会答，递推会填会推。同一公式，两种走法；n 大优先递推。</div>
+  </section>
+</div>
+
+<script>
+const N = 6;
+
+/* recursion walk */
+const recSteps = (() => {
+  const calls = [];
+  function f(n, depth) {
+    calls.push({ n, depth, type: 'call' });
+    if (n <= 2) { calls.push({ n, depth, type: 'ret', val: 1 }); return 1; }
+    const a = f(n - 1, depth + 1);
+    const b = f(n - 2, depth + 1);
+    const v = a + b;
+    calls.push({ n, depth, type: 'ret', val: v });
+    return v;
+  }
+  f(N, 0);
+  return calls;
+})();
+let ri = 0;
+function render1() {
+  const st = recSteps[ri];
+  const stack = [];
+  const memo = {};
+  for (let i = 0; i <= ri; i++) {
+    const s = recSteps[i];
+    if (s.type === 'call') stack.push(s.n);
+    else { stack.pop(); memo[s.n] = s.val; }
+  }
+  document.getElementById('stack1').innerHTML = stack.map((n, i) =>
+    `<div class="box big ${i===stack.length-1?'hl':''}">f(${n})</div>`
+  ).join('') || '<div class="box dim">空栈</div>';
+  document.getElementById('memo1').innerHTML =
+    Object.keys(memo).sort((a,b)=>a-b).map(k =>
+      `f(${k}) = <b style="color:var(--green)">${memo[k]}</b>`
+    ).join('<br>') || '还没有返回值';
+  document.getElementById('c1').innerHTML =
+    st.type==='call' ? `调用 <em>f(${st.n})</em>（深度 ${st.depth}）`
+    : `<span class="ok">f(${st.n}) 返回 ${st.val}</span>`;
+  document.getElementById('b1').textContent =
+    st.type==='call' ? `向下问 f(${st.n})…` : `向上交差：f(${st.n}) = ${st.val}`;
+}
+document.getElementById('n1').onclick = () => { if (ri < recSteps.length-1) { ri++; render1(); } };
+document.getElementById('r1').onclick = () => { ri = 0; render1(); };
+
+/* dp fill */
+let di = 0;
+function render2() {
+  const vals = [null, 1, 1];
+  const maxFill = Math.min(N, 2 + di);
+  for (let i = 3; i <= maxFill; i++) vals[i] = vals[i-1] + vals[i-2];
+  const el = document.getElementById('dp2');
+  el.innerHTML = '';
+  for (let i = 1; i <= N; i++) {
+    const has = vals[i] != null;
+    const d = document.createElement('div');
+    d.className = 'box big ' + (has ? (i === maxFill && di > 0 ? 'hl' : 'done') : 'dim');
+    d.innerHTML = has ? `${i}<br>${vals[i]}` : `${i}<br>?`;
+    el.appendChild(d);
+  }
+  if (di === 0) {
+    document.getElementById('c2').innerHTML = '先写好边界：dp[1]=1, dp[2]=1';
+    document.getElementById('b2').textContent = '边界是递推的起点';
+  } else if (maxFill >= N) {
+    document.getElementById('c2').innerHTML = `<span class="ok">填到 dp[${N}]=${vals[N]}</span> 完成，无重复计算`;
+    document.getElementById('b2').textContent = '只从左往右推一遍';
+  } else {
+    document.getElementById('c2').innerHTML = `推出 <em>dp[${maxFill}] = dp[${maxFill-1}] + dp[${maxFill-2}] = ${vals[maxFill]}</em>`;
+    document.getElementById('b2').textContent = '用前两项算当前项';
+  }
+}
+document.getElementById('n2').onclick = () => { if (di < N - 1) { di++; render2(); } };
+document.getElementById('r2').onclick = () => { di = 0; render2(); };
+
+/* dual language code */
+const CODES = {
+  cpp: {
+    rec: `#include <bits/stdc++.h>
+using namespace std;
+
+// 递归：问下去再答
+long long f(int n) {
+    if (n <= 2) return 1;          // 出口
+    return f(n - 1) + f(n - 2);    // 问两次
+}
+
+int main() {
+    int n = 6;
+    cout << f(n) << endl;          // 8
+}`,
+    iter: `#include <bits/stdc++.h>
+using namespace std;
+
+// 递推：从小到大填表
+int main() {
+    int n = 6;
+    long long dp[10];
+    dp[1] = 1; dp[2] = 1;          // 边界
+    for (int i = 3; i <= n; i++)
+        dp[i] = dp[i-1] + dp[i-2]; // 递推式
+    cout << dp[n] << endl;         // 8
+}`
+  },
+  py: {
+    rec: `# 递归：问下去再答
+def f(n):
+    if n <= 2:
+        return 1          # 出口
+    return f(n-1) + f(n-2)  # 问两次
+
+n = 6
+print(f(n))               # 8
+
+# 注意：n 很大可能 RecursionError
+# 可 sys.setrecursionlimit(10000) 但仍可能爆栈`,
+    iter: `# 递推：从小到大填表
+n = 6
+dp = [0] * (n + 1)
+dp[1] = 1
+dp[2] = 1                  # 边界
+for i in range(3, n + 1):
+    dp[i] = dp[i-1] + dp[i-2]  # 递推式
+print(dp[n])               # 8
+
+# 也可以只存两个变量滚动
+# a, b = 1, 1
+# for _ in range(n-2): a, b = b, a+b
+# print(b)`
+  }
+};
+let lang = 'cpp';
+function paintCode() {
+  document.getElementById('codeRec').textContent = CODES[lang].rec;
+  document.getElementById('codeIter').textContent = CODES[lang].iter;
+}
+document.querySelectorAll('.lang button').forEach(b => {
+  b.onclick = () => {
+    lang = b.dataset.lang;
+    document.querySelectorAll('.lang button').forEach(x => x.classList.toggle('on', x === b));
+    paintCode();
+  };
+});
+
+/* tabs */
+const tabs = [['t1','s1'],['t2','s2'],['t3','s3'],['t4','s4']];
+tabs.forEach(([tid,sid], idx) => {
+  document.getElementById(tid).onclick = () => {
+    tabs.forEach(([t,s], j) => {
+      document.getElementById(t).classList.toggle('on', j===idx);
+      document.getElementById(s).style.display = j===idx ? '' : 'none';
+    });
+  };
+});
+
+render1(); render2(); paintCode();
+</script>
+</body>
+</html>
