@@ -3,12 +3,11 @@ feature: vox-remaining-knowledge-points
 status: delivered
 updated: 2026-09-14
 branch: main
-commits: 49ce658..HEAD
+commits: 49ce658..36fda72
 ---
 
 # 按知识点补完剩余 VOX
 
-## Report
 ## Report
 
 **What was built** — 第三批 11 条算法向 VOX：栈括号匹配、BFS、DFS 全排列、位运算、约瑟夫环、活动选择、最大子段和、二叉树前序、GCD 辗转相除、高精度加法、贪心找零。每条 16s，小手（--hand-scale 0.34）、apad 补静音、烧字幕。VOX_MAP 覆盖主要算法课；找零钱不再误挂分治片。工作区说明：沙箱禁止 git worktree add，沿用站点仓 main 直推。
