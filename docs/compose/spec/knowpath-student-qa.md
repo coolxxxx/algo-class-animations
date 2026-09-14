@@ -3,7 +3,7 @@ feature: knowpath-student-qa
 status: delivered
 updated: 2026-09-14
 branch: main
-commits: 1227ed4..HEAD
+commits: 1227ed4..9948a75
 ---
 
 # 以知识点为中心的学生学习路径
