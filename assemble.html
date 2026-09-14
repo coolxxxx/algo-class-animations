@@ -286,6 +286,64 @@ const CASES = {
     ],
     flow: ["定义 Act","cmp 结束早","输入","sort","贪心扫描"],
   },
+
+  "binary-search": {
+    title: "二分查找",
+    pieces: [
+      { id:"init", name:"① 初始化 lo/hi", why:"在有序区间上夹逼", lines:[5,6], when:"main 开始" },
+      { id:"loop", name:"② while 夹逼", why:"区间还有效就继续", lines:[7], when:"核心循环" },
+      { id:"mid", name:"③ 算 mid", why:"lo+(hi-lo)/2 防溢出", lines:[8], when:"每轮取中点" },
+      { id:"cmp", name:"④ 比较三分支", why:"相等/小了/大了", lines:[9,10,11,12], when:"决定丢哪半" },
+      { id:"out", name:"⑤ 输出下标", why:"找不到则 -1", lines:[15], when:"结束" },
+    ],
+    lines: [
+      '#include <bits/stdc++.h>',
+      'using namespace std;',
+      '',
+      'int main() {',
+      '    int a[] = {1,3,5,7,9,11,13};',
+      '    int n = 7, target = 7;',
+      '    int lo = 0, hi = n - 1, ans = -1;',
+      '    while (lo <= hi) {',
+      '        int mid = lo + (hi - lo) / 2;',
+      '        if (a[mid] == target) { ans = mid; break; }',
+      '        if (a[mid] < target) lo = mid + 1;',
+      '        else hi = mid - 1;',
+      '    }',
+      '    cout << ans << endl;',
+      '}',
+    ],
+    flow: ["lo/hi","while","mid","三分支","输出"],
+  },
+
+  "hanoi": {
+    title: "汉诺塔（递归）",
+    pieces: [
+      { id:"fn", name:"① move 函数", why:"把 n 个盘从 a 搬到 c，b 中转", lines:[3,4,5,6,7,8,9], when:"递归定义" },
+      { id:"exit", name:"② 边界 n==0", why:"没有盘就结束", lines:[4], when:"递归出口" },
+      { id:"rec1", name:"③ 先搬 n-1 到中转", why:"a→b，借 c", lines:[5], when:"向下递归" },
+      { id:"one", name:"④ 搬最大盘", why:"a→c 输出一步", lines:[6], when:"本层动作" },
+      { id:"rec2", name:"⑤ 再把 n-1 叠回", why:"b→c，借 a", lines:[7], when:"归上来" },
+      { id:"main", name:"⑥ main 调用", why:"n=3 演示", lines:[11,12,13,14], when:"入口" },
+    ],
+    lines: [
+      '#include <bits/stdc++.h>',
+      'using namespace std;',
+      '',
+      'void move(int n, char a, char c, char b) {',
+      '    if (n == 0) return;',
+      '    move(n - 1, a, b, c);',
+      '    cout << a << " -> " << c << endl;',
+      '    move(n - 1, b, c, a);',
+      '}',
+      '',
+      'int main() {',
+      '    int n = 3;',
+      '    move(n, \'A\', \'C\', \'B\');',
+      '}',
+    ],
+    flow: ["定义 move","边界","n-1 到中转","搬最大","n-1 叠回"],
+  },
 };
 
 let cur = "struct-score";
@@ -315,7 +373,7 @@ function render() {
     `<button class="tab${k===cur?' on':''}" data-k="${k}">${c.short||CASES[k].title.split('（')[0]}</button>`
   ).join('');
   // shorter labels
-  const labels = { "struct-score":"成绩表排序", "merge-sort":"归并排序", "vip-sort":"VIP多关键字", "activity":"活动选择" };
+  const labels = { "struct-score":"成绩表排序", "merge-sort":"归并排序", "vip-sort":"VIP多关键字", "activity":"活动选择", "binary-search":"二分查找", "hanoi":"汉诺塔" };
   $("tabs").innerHTML = Object.keys(CASES).map(k =>
     `<button class="tab${k===cur?' on':''}" data-k="${k}">${labels[k]}</button>`
   ).join('');
