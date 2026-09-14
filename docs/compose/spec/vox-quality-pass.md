@@ -3,12 +3,10 @@ feature: vox-quality-pass
 status: delivered
 updated: 2026-09-14
 branch: main
-commits: 215d188..PENDING
+commits: 215d188..0d2f97e
 ---
 
 # VOX 质量短板修复
-
-## Report
 
 ## Report
 
