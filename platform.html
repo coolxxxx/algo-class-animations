@@ -541,8 +541,9 @@ body.embed #main{padding:0}
         <button id="btnPlay" class="btn-primary">▶ 播放</button>
         <button id="btnStep" title="下一步（右方向键）">下一步 ▶</button>
         <button id="btnSyn" title="本课语法格式与规范">📜 语法卡</button>
-        <button id="btnQuiz" title="考考你：主动回忆记得牢">🎯 考考你</button>
-        <button id="btnFill" title="填空挑战：填对才运行">⌨️ 填空</button>
+        <button id="btnQuiz" title="考考你：主动回忆记得牢（需授权）">🎯 考考你</button>
+        <button id="btnFill" title="填空挑战：填对才运行（需授权）">⌨️ 填空</button>
+        <button id="btnVox" title="本课配套白板手绘动画">🎬 VOX 动画</button>
         <button id="btnRand" title="一键换一组随机数据，再演示一遍">🎲 换数据</button>
         <input id="progress" type="range" min="0" max="1" value="0">
         <span id="stepInfo" class="muted">0 / 0</span>
@@ -6542,6 +6543,86 @@ const AUTH_GATE_TIP='微信扫码添加夏老师，或输入授权码进入';   
 function authOk(){ try{ return localStorage.getItem('szj_auth')==='1'; }catch(e){ return false; } }
 function markAuth(){ try{ localStorage.setItem('szj_auth','1'); }catch(e){} }
 
+/* 分级授权：基础免费；测验/填空等特色功能需授权 */
+function requireAuthForFeature(featureName, action){
+  if(authOk()){ action(); return; }
+  const g=document.createElement('div'); g.id='gate';
+  const qrSrc=WECHAT_QR&&WECHAT_QR.startsWith('data:')?WECHAT_QR:'wechat_qr.png';
+  g.innerHTML=
+    '<div class="gate-card">'+
+      '<div class="gate-brand">🔓 '+featureName+' · 需要授权</div>'+
+      '<div class="gate-sub">基础浏览、代码演示、语法卡均免费<br>测验 / 填空等特色功能需授权码</div>'+
+      '<img class="gate-qr" id="gateQr" alt="二维码">'+
+      '<div class="gate-qrph" id="gateQrPh" style="display:none">'+AUTH_QR_TIP+'</div>'+
+      '<div class="gate-tip">'+AUTH_GATE_TIP+'</div>'+
+      '<input class="gate-input" id="gateCode" placeholder="输入授权码" autocomplete="off">'+
+      '<button class="gate-btn" id="gateBtn">🔓 解锁'+featureName+'</button>'+
+      '<div class="gate-err" id="gateErr"></div>'+
+      '<div class="gate-foot">未授权也可关闭此窗继续使用基础功能</div>'+
+      '<button class="gate-btn" id="gateSkip" style="margin-top:10px;background:rgba(126,164,222,.15);color:var(--tx)">继续使用基础功能</button>'+
+    '</div>';
+  document.body.appendChild(g);
+  const img=g.querySelector('#gateQr');
+  img.onerror=()=>{ img.style.display='none'; g.querySelector('#gateQrPh').style.display='flex'; };
+  img.src=qrSrc;
+  const doUnlock=()=>{
+    const v=(g.querySelector('#gateCode').value||'').trim();
+    if(AUTH_CODES.indexOf(v)>=0){
+      markAuth();
+      g.remove();
+      action();
+    }else{
+      g.querySelector('#gateErr').textContent='授权码不对，请微信扫码找夏老师获取';
+      const inp=g.querySelector('#gateCode');
+      inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+    }
+  };
+  g.querySelector('#gateBtn').onclick=safe(doUnlock);
+  g.querySelector('#gateSkip').onclick=safe(()=>g.remove());
+  g.querySelector('#gateCode').addEventListener('keydown',e=>{ if(e.key==='Enter') doUnlock(); });
+  setTimeout(()=>{ g.querySelector('#gateCode').focus(); },200);
+}
+
+/* ---------- 本课 VOX 动画映射 ---------- */
+const VOX_MAP = {
+  // 递归
+  'cpp4-1': { title:'递归栈 · 递下去再归上来', url:'videos/hard-recursion-stack.mp4' },
+  'py4-1':  { title:'递归栈 · 递下去再归上来', url:'videos/hard-recursion-stack.mp4' },
+  'py4-3':  { title:'递推 vs 递归', url:'videos/recur-vs-iter.mp4' },
+  'cpp6-1': { title:'递推 vs 递归（爬楼梯）', url:'videos/recur-vs-iter.mp4' },
+  // 排序 / 结构体
+  'cpp5-1': { title:'分治贪心 VOX', url:'videos/divide-greedy-vox.mp4' },
+  'cpp5-2': { title:'分治贪心 VOX', url:'videos/divide-greedy-vox.mp4' },
+  'cpp3-1': { title:'结构体档案袋 VOX', url:'videos/struct-vox.mp4' },
+  'cpp3-2': { title:'结构体档案袋 VOX', url:'videos/struct-vox.mp4' },
+  // 贪心
+  'py6-2':  { title:'分治贪心 VOX', url:'videos/divide-greedy-vox.mp4' },
+  'cpp6-3': { title:'分治贪心 VOX', url:'videos/divide-greedy-vox.mp4' },
+};
+function showVoxForLesson(){
+  const id=state.lesson&&state.lesson.id;
+  const hit=VOX_MAP[id];
+  const m=document.createElement('div'); m.id='gate';
+  m.innerHTML=
+    '<div class="gate-card">'+
+      '<div class="gate-brand">🎬 本课 VOX 白板动画</div>'+
+      (hit
+        ? '<div class="gate-sub">'+hit.title+'</div>'+
+          '<video controls playsinline style="width:100%;max-width:520px;border-radius:12px;background:#000;margin:12px auto">'+
+          '<source src="'+hit.url+'" type="video/mp4"></video>'+
+          '<div class="gate-foot"><a href="'+hit.url+'" target="_blank" style="color:#22d3ee">新窗口打开</a></div>'
+        : '<div class="gate-sub">这一课暂无单独 VOX 片。<br>可先看课堂动画；或到站点首页浏览已有白板片。</div>'+
+          '<div class="gate-foot" style="margin-top:12px">'+
+          '<a href="videos/divide-greedy-vox.mp4" target="_blank" style="color:#22d3ee;margin:0 8px">分治贪心</a>'+
+          '<a href="videos/recur-vs-iter.mp4" target="_blank" style="color:#22d3ee;margin:0 8px">递推vs递归</a>'+
+          '<a href="videos/struct-vox.mp4" target="_blank" style="color:#22d3ee;margin:0 8px">结构体</a>'+
+          '</div>')+
+      '<button class="gate-btn" id="gateSkip" style="margin-top:12px">关闭</button>'+
+    '</div>';
+  document.body.appendChild(m);
+  m.querySelector('#gateSkip').onclick=safe(()=>m.remove());
+}
+
 function showGate(){
   const g=document.createElement('div'); g.id='gate';
   const qrSrc=WECHAT_QR&&WECHAT_QR.startsWith('data:')?WECHAT_QR:'wechat_qr.png';
@@ -7252,8 +7333,9 @@ function bindUI(){
   $('#fsPlus').onclick=safe(()=>applyFs(currentFs()+0.15));
   $('#btnWm').onclick=safe(toggleWatermark);
   $('#btnSyn').onclick=safe(showSyn);
-  $('#btnQuiz').onclick=safe(showQuiz);
-  $('#btnFill').onclick=safe(showFill);
+  $('#btnQuiz').onclick=safe(()=>requireAuthForFeature('测验', showQuiz));
+  $('#btnFill').onclick=safe(()=>requireAuthForFeature('填空', showFill));
+  $('#btnVox').onclick=safe(showVoxForLesson);
   $('#btnRand').onclick=safe(randomizeData);
   document.getElementById('modeT').onclick=safe(()=>setMode('teacher'));
   document.getElementById('modeS').onclick=safe(()=>setMode('student'));
@@ -7387,7 +7469,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     return;
   }
   initWatermark();
-  if(!authOk()){ showGate(); return; }   // 未授权 → 授权门
+  // 基础功能无需授权；测验/填空等特色功能在点击时再校验
   startApp();
 });
 
