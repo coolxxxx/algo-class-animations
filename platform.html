@@ -6601,8 +6601,10 @@ const VOX_MAP = {
   // 结构体 / 贪心
   'cpp4-6': { title:'结构体档案袋 VOX', url:'videos/struct-vox.mp4' },
   'cpp4-7': { title:'结构体档案袋 VOX', url:'videos/struct-vox.mp4' },
-  'py6-2':  { title:'分治贪心 VOX', url:'videos/divide-greedy-vox.mp4' },
-  'cpp6-3': { title:'分治贪心 VOX', url:'videos/divide-greedy-vox.mp4' },
+  'py6-2':  { title:'贪心找零 VOX', url:'videos/vox-change.mp4' },
+  'cpp6-3': { title:'贪心找零 VOX', url:'videos/vox-change.mp4' },
+  'py6-6':  { title:'活动选择 VOX', url:'videos/vox-activity.mp4' },
+  'cpp5-7': { title:'活动选择 VOX', url:'videos/vox-activity.mp4' },
   // 二分 / 指针 / 汉诺塔
   'cpp5-3': { title:'二分查找 VOX', url:'videos/vox-binary.mp4' },
   'py5-3':  { title:'二分查找 VOX', url:'videos/vox-binary.mp4' },
@@ -6611,7 +6613,7 @@ const VOX_MAP = {
   'cpp4-5': { title:'指针与引用 VOX', url:'videos/vox-pointer.mp4' },
   'cpp6-5': { title:'汉诺塔 VOX', url:'videos/vox-hanoi.mp4' },
   'py5-5':  { title:'汉诺塔 VOX', url:'videos/vox-hanoi.mp4' },
-  // 链表 / 筛法
+  // 链表 / 筛法 / 栈 / 树
   'py5-7':  { title:'单链表 · 改线不搬家 VOX', url:'videos/vox-linked.mp4' },
   'py5-8':  { title:'单链表 · 改线不搬家 VOX', url:'videos/vox-linked.mp4' },
   'py5-9':  { title:'单链表 · 改线不搬家 VOX', url:'videos/vox-linked.mp4' },
@@ -6620,6 +6622,19 @@ const VOX_MAP = {
   'cpp5-10':{ title:'单链表 · 改线不搬家 VOX', url:'videos/vox-linked.mp4' },
   'py6-4':  { title:'埃氏筛 · 质数关灯 VOX', url:'videos/vox-sieve.mp4' },
   'cpp5-4': { title:'埃氏筛 · 质数关灯 VOX', url:'videos/vox-sieve.mp4' },
+  'py6-1':  { title:'栈 · 括号匹配 VOX', url:'videos/vox-stack.mp4' },
+  'cpp6-4': { title:'栈 · 括号匹配 VOX', url:'videos/vox-stack.mp4' },
+  'cpp6-6': { title:'栈 · 括号匹配 VOX', url:'videos/vox-stack.mp4' },
+  'cpp6-9': { title:'二叉树前序 VOX', url:'videos/vox-tree.mp4' },
+  // 搜索 / DP / 位运算 / 数论
+  'cpp6-7': { title:'BFS 迷宫最短路 VOX', url:'videos/vox-bfs.mp4' },
+  'cpp6-8': { title:'DFS 全排列 VOX', url:'videos/vox-dfs.mp4' },
+  'py6-3':  { title:'最大子段和 VOX', url:'videos/vox-maxsub.mp4' },
+  'cpp3-8': { title:'位运算 VOX', url:'videos/vox-bits.mp4' },
+  'cpp5-5': { title:'位运算 VOX', url:'videos/vox-bits.mp4' },
+  'py6-5':  { title:'约瑟夫环 VOX', url:'videos/vox-joseph.mp4' },
+  'cpp5-11':{ title:'辗转相除 GCD VOX', url:'videos/vox-gcd.mp4' },
+  'cpp6-2': { title:'高精度加法 VOX', url:'videos/vox-bigadd.mp4' },
 };
 function showVoxForLesson(){
   const id=state.lesson&&state.lesson.id;
@@ -6635,9 +6650,12 @@ function showVoxForLesson(){
           '<div class="gate-foot"><a href="'+hit.url+'" target="_blank" style="color:#22d3ee">新窗口打开</a></div>'
         : '<div class="gate-sub">这一课暂无单独 VOX 片。<br>可先看课堂动画；或到站点首页浏览已有白板片。</div>'+
           '<div class="gate-foot" style="margin-top:12px">'+
-          '<a href="videos/divide-greedy-vox.mp4" target="_blank" style="color:#22d3ee;margin:0 8px">分治贪心</a>'+
-          '<a href="videos/recur-vs-iter.mp4" target="_blank" style="color:#22d3ee;margin:0 8px">递推vs递归</a>'+
-          '<a href="videos/struct-vox.mp4" target="_blank" style="color:#22d3ee;margin:0 8px">结构体</a>'+
+          '<a href="videos/vox-merge.mp4" target="_blank" style="color:#22d3ee;margin:0 8px">归并</a>'+
+          '<a href="videos/vox-stack.mp4" target="_blank" style="color:#22d3ee;margin:0 8px">栈</a>'+
+          '<a href="videos/vox-bfs.mp4" target="_blank" style="color:#22d3ee;margin:0 8px">BFS</a>'+
+          '<a href="videos/vox-dfs.mp4" target="_blank" style="color:#22d3ee;margin:0 8px">DFS</a>'+
+          '<a href="videos/vox-tree.mp4" target="_blank" style="color:#22d3ee;margin:0 8px">二叉树</a>'+
+          '<a href="videos/divide-greedy-vox.mp4" target="_blank" style="color:#22d3ee;margin:0 8px">分治</a>'+
           '</div>')+
       '<button class="gate-btn" id="gateSkip" style="margin-top:12px">关闭</button>'+
     '</div>';
