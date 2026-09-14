@@ -1,6 +1,6 @@
 ---
 feature: knowpath-student-qa
-status: designed
+status: delivered
 updated: 2026-09-14
 branch: main
 commits: 1227ed4..HEAD
@@ -9,6 +9,17 @@ commits: 1227ed4..HEAD
 # 以知识点为中心的学生学习路径
 
 ## Report
+
+## Report
+
+**What was built** — 展示台每课增加「🧭 学习路径 · 学生八问」：是什么 / 例子(VOX) / 解决什么 / 代码 / 语法 / 上手 / 哪里用 / 为何学。KNOW 覆盖全部 44 个 VOX 课号；无 KNOW 的课不编 3/7/8 空话。VOX 作为第 2 步入口，旁挂按钮保留。
+
+**Verification** — node 解析 KNOW+renderKnowPath PASS（44 keys）；VOX 课号 − KNOW 课号 = 空集。
+
+**Journey log**
+1. VOX 旁挂 → 路径第 2 步，学生问题链才闭环
+2. 无 KNOW 硬填空话被评审打回 → 有字段才渲染 3/7/8
+3. 缺口是 WHY/REFLECT 文案与串联，不是缺外部仓库
 
 ## [S1] Problem
 展示台已有故事/代码/动画/语法卡/测验/VOX 按钮，但资源是「旁挂」：
@@ -41,7 +52,7 @@ commits: 1227ed4..HEAD
 - 不改授权逻辑
 
 ## Tasks
-- [ ] T1: 注入 KNOW 数据 + 路径 UI/CSS/JS — acceptance: 有 KNOW 的课显示八问面板 (covers: S2)
-- [ ] T2: VOX 嵌入路径第2步 — acceptance: 点路径可看 VOX，旁挂按钮仍在 (covers: S2; depends: T1)
-- [ ] T3: 覆盖主要算法课 KNOW 文案 — acceptance: VOX 映射课均有 why/where/reflect/first (covers: S2; depends: T1)
-- [ ] T4: 推送并验证 — acceptance: Pages 打开某算法课可见学习路径 (covers: S2)
+- [x] T1: 注入 KNOW 数据 + 路径 UI/CSS/JS — acceptance: 有 KNOW 的课显示八问面板 (covers: S2)
+- [x] T2: VOX 嵌入路径第2步 — acceptance: 点路径可看 VOX，旁挂按钮仍在 (covers: S2; depends: T1)
+- [x] T3: 覆盖主要算法课 KNOW 文案 — acceptance: VOX 映射课均有 why/where/reflect/first (covers: S2; depends: T1)
+- [x] T4: 推送并验证 — acceptance: Pages 打开某算法课可见学习路径 (covers: S2)
