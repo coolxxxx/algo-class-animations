@@ -502,6 +502,28 @@ body.embed #main{padding:0}
 .ll-idxtag{position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--tx3);font-weight:600;white-space:nowrap}
 .ll-curtag{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:800;color:var(--am);white-space:nowrap}
 
+
+/* ---------- 学习路径 · 学生八问 ---------- */
+#knowPath{margin:8px 0 10px;border:1px solid rgba(76,194,255,.25);border-radius:12px;background:rgba(76,194,255,.06);overflow:hidden}
+#knowPath.kp-hide{display:none}
+.kp-bar{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;user-select:none;font-size:calc(13px * var(--fscale,1));font-weight:800;color:#7dd3fc}
+.kp-bar:hover{background:rgba(76,194,255,.08)}
+.kp-bar .kp-tag{font-size:11px;font-weight:700;color:#94a3b8;opacity:.9}
+.kp-bar .kp-caret{margin-left:auto;transition:transform .2s;color:#64748b}
+#knowPath.kp-open .kp-caret{transform:rotate(90deg)}
+.kp-body{display:none;padding:2px 10px 12px}
+#knowPath.kp-open .kp-body{display:block}
+.kp-q{display:grid;grid-template-columns:28px 1fr;gap:8px;margin:8px 0;padding:8px 10px;border-radius:10px;background:rgba(15,23,42,.35);border:1px solid rgba(148,163,184,.12)}
+.kp-n{width:24px;height:24px;border-radius:999px;background:rgba(76,194,255,.15);color:#7dd3fc;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.kp-ask{font-size:11.5px;color:#94a3b8;font-weight:700;margin-bottom:2px}
+.kp-ans{font-size:calc(13px * var(--fscale,1));line-height:1.55;color:#e2e8f0}
+.kp-ans code{background:rgba(148,163,184,.15);padding:1px 5px;border-radius:4px;font-size:.92em}
+.kp-list{margin:4px 0 0 1.1em;padding:0}
+.kp-list li{font-size:calc(12.5px * var(--fscale,1));line-height:1.5;color:#cbd5e1;margin:2px 0}
+.kp-vox{display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:6px 12px;border-radius:999px;border:1px solid rgba(251,191,36,.45);background:rgba(251,191,36,.12);color:#fcd34d;font-size:12.5px;font-weight:800;cursor:pointer}
+.kp-vox:hover{background:rgba(251,191,36,.2)}
+.kp-skip{font-size:12px;color:#64748b;font-style:italic}
+
 </style>
 </head>
 <body>
@@ -535,6 +557,10 @@ body.embed #main{padding:0}
         <textarea id="code" spellcheck="false" autocomplete="off"></textarea>
       </div>
       <div id="tryit"><span id="lessonTryit"></span><span id="inputChips"></span></div>
+      <div id="knowPath" class="kp-hide">
+        <div class="kp-bar" id="kpBar"><span>🧭 学习路径 · 学生八问</span><span class="kp-tag">是什么→例子→解决什么→代码→语法→上手→哪里用→为何学</span><span class="kp-caret">›</span></div>
+        <div class="kp-body" id="kpBody"></div>
+      </div>
       <div id="controls">
         <button id="btnReset" title="回到第一步">⏮ 重置</button>
         <button id="btnBack" title="上一步（左方向键）">◀ 上一步</button>
@@ -6584,6 +6610,51 @@ function requireAuthForFeature(featureName, action){
 }
 
 /* ---------- 本课 VOX 动画映射 ---------- */
+
+/* ============================================================
+ * KNOW：知识点学生八问（解决什么 / 哪里用 / 为何学 / 怎么上手）
+ * 有 VOX 的算法课优先写满；缺失字段的课走降级路径
+ * ============================================================ */
+const KNOW = {
+  'py3-2': { why:'要把一堆乱序成绩/数字从小到大排好，才能二分查找、输出排行榜。', where:'成绩排名、名次表、任何「有序才有答案」的题。', reflect:'排序是算法入门第一课：你第一次系统比较「交换次数」和「思想」，后面堆排、快排都站在它肩上。', first:['看动画数交换次数','改数组为 [9,1,5,2,8] 再跑','自己手写一遍两层 for'] },
+  'cpp5-1': { why:'乱序数组没法二分、没法直接出榜，必须先排。', where:'GESP 三级+排序题、结构体按分数排序、VIP 双关键字。', reflect:'理解「相邻比较」和「每轮冒一个最大」——这是 O(n²) 思维的标尺，后面才能体会快排为何更快。', first:['盯橙=比较、红=交换','最坏情况 [9,8,7,6,5] 数交换','和选择排序对比交换次数'] },
+  'cpp5-2': { why:'每轮只换一次，交换次数比冒泡少。', where:'考试选择题常考；交换代价高时比冒泡合适。', reflect:'和冒泡对比，你才真正分清「比较次数」和「交换次数」两把尺子。', first:['找出每轮最小下标 mi','对比冒泡交换次数','手推一轮 mi 位置'] },
+  'py5-1': { why:'每轮把最小的放到最前，像按身高排队。', where:'体育课排队、名次表、基础排序题。', reflect:'「未排序区逐渐缩小」是几乎所有选择类算法的母题。', first:['看每轮 mi','交换 a[i] 与 a[mi]','数一数总共换几次'] },
+  'py5-2': { why:'像摸扑克牌，手里始终有序，适合「数据基本有序」的场景。', where:'扑克整理、插入类数据、小规模近有序数组。', reflect:'理解「局部有序」——后面归并合并、堆插入都有它的影子。', first:['key 拿出来','比 key 大的右移','插进空位'] },
+  'py5-6': { why:'要稳定排序且最坏也是 O(n log n)，归并是标准答案。', where:'逆序对、外部排序、稳定排序要求的题。', reflect:'第一次完整走通「分治」：分到不能再分，再有序合并——递归与双指针同时上场。', first:['看左边对半拆','看双指针比最上张','手推一轮合并'] },
+  'cpp5-6': { why:'C++ 竞赛里稳定 O(n log n) 的主力之一。', where:'GESP/CSP 排序题、逆序对、需要稳定的场合。', reflect:'msort 递归栈 + merge 双指针，是分治思想最干净的落地。', first:['读 msort 出口','读 merge 谁小取谁','tmp 数组别开成局部过小'] },
+  'py5-3': { why:'有序数组里找数，每次排除一半，100 个数最多 7 次。', where:'猜数字、查找题、lower_bound 思想。', reflect:'从 O(n) 扫到 O(log n)，你第一次感受到「利用有序」换速度。', first:['画 lo/hi/mid','想清「大了丢哪边」','测 target 不存在时'] },
+  'cpp5-3': { why:'竞赛查找标配，比线性扫快一个数量级。', where:'查找、二分答案、最小值最大化。', reflect:'二分模板是后面「二分答案」的地基，边界写错就死循环。', first:['while(lo<=hi)','mid 用 lo+(hi-lo)/2','测边界值'] },
+  'py5-5': { why:'三根柱子上搬盘，一次一个、大盘不能压小盘，用递归拆解。', where:'递归经典、2^n-1 步数证明、函数调用理解。', reflect:'「先把 n-1 挪走，搬最大的，再挪回来」——递归思维的成人礼。', first:['n=3 数 7 步','写 move 函数签名','看调用栈层数'] },
+  'cpp6-5': { why:'递归搬盘是理解「函数自己调自己」的最佳模型。', where:'GESP 五级递归、CSP-J 入门递归题。', reflect:'你能口述递归三要素（边界、递推、归）时，递归就通了。', first:['画三层调用','验证 2^n-1','引用传参改 vector'] },
+  'cpp4-2': { why:'变量住在内存里，指针存的是「门牌号」，能间接改数据、传大对象。', where:'数组遍历、函数改本体、链表、动态内存。', reflect:'理解内存布局后，数组名、传参、链表才不再是魔法。', first:['看 &a 取地址','看 *p 按号取值','改 *p 观察 a'] },
+  'cpp4-3': { why:'普通传参是复印件，加 & 变别名才能真正交换成功。', where:'swap 函数、改数组、大结构体传参。', reflect:'「值传递 vs 引用传递」是 C++ 函数正确性的分水岭。', first:['对比有无 &','手推 swap 两版','链表/数组操作里用引用'] },
+  'cpp4-5': { why:'数组元素地址连续，指针+1 就是下一家，能高效遍历。', where:'数组遍历、字符串指针、底层内存题。', reflect:'把数组看成「一排连续门牌」，指针运算就直觉了。', first:['看 p 如何步进','*p 读当前','p++ 与 a[i] 对照'] },
+  'py5-7': { why:'数组插入删除要搬砖，链表改线即可，插入删除 O(1)。', where:'五级链表、约瑟夫、邻接表、撤销栈。', reflect:'从「连续内存」思维切换到「结点+指针」思维，是数据结构的分水岭。', first:['画 head→30→50→40→NULL','头插一个结点','删除中间结点改线'] },
+  'py5-8': { why:'删结点不用搬家，前驱 next 跨过它。', where:'链表删除、去重、按值删。', reflect:'「改线不搬家」是链表全部操作的总纲。', first:['找到前驱','prev.next = cur.next','特判删头'] },
+  'cpp5-8': { why:'数组模拟链表：data[] + next[]，竞赛常考。', where:'GESP 五级、不用 new 的链表题。', reflect:'同一逻辑两种实现（真指针 vs 数组模拟），你才真正掌握链表本质。', first:['头插三步走','-1 表示结束','遍历打印验证'] },
+  'cpp5-9': { why:'按值删除结点，理解「逻辑删除 vs 物理删除」。', where:'链表删除题、垃圾结点够不着。', reflect:'内存还在但已失联——这是指针安全的直觉来源。', first:['找 val','改 next','边界：删头/不存在'] },
+  'cpp5-10': { why:'真指针版：new 在堆区开房间，-> 访问成员。', where:'C++ 链表本体、动态结构。', reflect:'堆区/栈区、new/delete、-> 与 . 的区别，一次搞清。', first:['new Node','->data / ->next','注意泄漏与空指针'] },
+  'py6-4': { why:'快速找出 2~n 全部质数，比逐个试除快。', where:'质数表、筛法、数论入门。', reflect:'「用空间换时间、批量关灯」是筛法家族（欧拉筛）的起点。', first:['从 2 关倍数','只筛到 √n','数 30 内质数个数'] },
+  'cpp5-4': { why:'竞赛筛质数标配 O(n log log n)。', where:'质数计数、分解质因数前置。', reflect:'理解「标记数组」——后面欧拉筛、并查集都靠它。', first:['is_p 数组','i*i 起筛','验证 100 内 25 个质数'] },
+  'py6-1': { why:'括号是否匹配，用栈「能进能出」判断。', where:'表达式匹配、网页标签、撤销操作。', reflect:'栈的后进先出，是你第一个「受限操作」的数据结构。', first:['遇 ( 压栈','遇 ) 弹栈配对','栈空=匹配'] },
+  'cpp6-4': { why:'top 指针升降就是入栈出栈。', where:'括号匹配、表达式求值、DFS。', reflect:'手写栈 vs STL stack，你才掌握底层与上层两种视角。', first:['st[top++]=ch','空栈弹出要判','测 (() 与 ())(' ] },
+  'cpp6-6': { why:'队列先进先出，BFS、排队模拟靠它。', where:'BFS、约瑟夫、任务调度。', reflect:'栈与队列对照学，数据结构「受限」思想就立住了。', first:['q.push 队尾','q.front 看队头','q.pop 弹队头'] },
+  'cpp6-9': { why:'树是分叉结构，前序「根左右」是最基础遍历。', why2:'', where:'文件目录、表达式树、二叉树题。', reflect:'从线性结构到树形结构，递归终于有了「天然场景」。', first:['画 A-B-D…','根左右口诀','写递归 pre'] },
+  'py6-2': { why:'凑零钱用最大面额优先，张数最少。', where:'找零、活动选择、区间贪心。', reflect:'「每步局部最优」何时等于全局最优——贪心正确性是难点也是考点。', first:['面额从大到小','能拿几张拿几张','测 87 元'] },
+  'cpp6-3': { why:'贪心找零：大面额优先。', where:'GESP 贪心入门题。', reflect:'和排序结合的贪心（活动选择）是你下一站。', first:['排序面额','循环取余','对比 143 元'] },
+  'py6-6': { why:'选最多相容活动：按结束时间排序再扫。', where:'区间调度、机房排课、会议室。', reflect:'「排序 + 一遍扫描」是很多贪心题的标准外形。', first:['按 end 排序','能接上就选','时间轴看绿条'] },
+  'cpp5-7': { why:'活动选择 C++ 版，结构体+sort+cmp。', where:'竞赛区间贪心。', reflect:'cmp 写对，贪心才成立——排序键选错全盘皆输。', first:['结构体存 s/e','cmp 按 e','扫描选取'] },
+  'cpp6-7': { why:'迷宫最短路：BFS 一层层淹，先到必最短。', where:'CSP-J 迷宫、连通块、最短步数。', reflect:'BFS 用队列、DFS 用栈/递归——搜索双子星第一次同框。', first:['起点入队','四方向扩展','第一次到终点即答案'] },
+  'cpp6-8': { why:'全排列：每层选一个没用过的，选满输出再回溯。', where:'排列组合、N皇后、子集。', reflect:'used 标记的「置1/清0」就是回溯的灵魂。', first:['n=3 试 6 种','used 数组','回头擦标记'] },
+  'py6-3': { why:'最大子段和：每步决定「接上前面」还是「另起」。', where:'最大子段、股票、序列 DP 入门。', reflect:'这是你第一道「以 i 结尾」的 DP，状态定义从此有套路。', first:['画决策两种','跟一遍 dp[i]','测全负数组'] },
+  'cpp3-8': { why:'二进制位直接运算：判奇偶、乘除 2、交换。', where:'GESP 三级位运算、状态压缩入门。', reflect:'把 int 当「一排灯」，你和计算机说的是同一种语言。', first:['n&1 判奇偶','<<1 与 >>1','异或交换不用临时变量'] },
+  'cpp5-5': { why:'位运算灯泡模型：与或异或移位。', where:'掩码、状态、技巧题。', reflect:'高频考点，也是后续状压 DP 的钥匙。', first:['0b1010 写法','& 取位 | 置位','^ 反转特定位'] },
+  'py6-5': { why:'围圈报数到 k 出局，最后留下谁。', where:'约瑟夫环、队列模拟、循环取余。', reflect:'「取余绕圈」是环形问题的万能钥匙。', first:['n=7 k=3 手推','pop 出局者','下标取模'] },
+  'cpp5-11': { why:'gcd(a,b)=gcd(b,a%b)，余数归零即答案。', where:'约分、分数、LCM、互质判断。', reflect:'两千年的算法只有三行——你第一次感受「数学保证正确」。', first:['48,18 手推','while(b) 循环','LCM=a*b/gcd'] },
+  'cpp6-2': { why:'int 装不下超大整数，用数组竖式相加。', where:'高精度加法/乘法、压位高精度。', reflect:'「拆成一位一位」是处理超规模数据的通用拆解法。', first:['倒序存数组','逐位加满十进一','测 999+1'] },
+};
+
 const VOX_MAP = {
   // 递归
   'cpp4-1': { title:'递归栈 · 递下去再归上来', url:'videos/hard-recursion-stack.mp4' },
@@ -6795,7 +6866,7 @@ function buildTaskStrip(){
       const current=!done&&steps.slice(0,k).every(x=>st[x[0]]);
       return '<button class="ts-step'+(done?' done':(current?' cur':''))+'" data-k="'+k+'">'+(done?'✓ ':'')+s[1]+'</button>';
     }).join('')+'</div>'+
-    '<div class="ts-hint">五步全部 ✓ 就点亮 🎓「本课学完」——点当前那一步开始！</div>';
+    '<div class="ts-hint">建议顺序：先走上方「🧭 学习路径 · 学生八问」，再回来做五步任务——全 ✓ 点亮 🎓「本课学完」。</div>';
   strip.querySelectorAll('.ts-step').forEach(b=>{
     b.onclick=safe(()=>{ const s=steps[parseInt(b.dataset.k)]; if(s&&s[2]) s[2](); });
   });
@@ -7121,6 +7192,57 @@ function buildSidebar(){
 }
 
 /* ---------- 选中课程 ---------- */
+
+/* ---------- 学习路径渲染 ---------- */
+function knowFor(id){ return (typeof KNOW!=='undefined' && KNOW[id]) || null; }
+function renderKnowPath(){
+  const el=document.getElementById('knowPath');
+  const body=document.getElementById('kpBody');
+  if(!el||!body||!state.lesson) return;
+  const id=state.lesson.id;
+  const kn=knowFor(id);
+  const vox=(typeof VOX_MAP!=='undefined' && VOX_MAP[id])||null;
+  const syn=(typeof SYN!=='undefined' && SYN[id])||null;
+  // 至少有 story 的课都显示路径；KNOW 让 3/6/7/8 变实
+  const rows=[];
+  const add=(n,ask,html)=>{ rows.push('<div class="kp-q"><div class="kp-n">'+n+'</div><div><div class="kp-ask">'+ask+'</div><div class="kp-ans">'+html+'</div></div></div>'); };
+  add(1,'这是什么意思？', esc(state.lesson.story||''));
+  let h2='';
+  if(vox){
+    h2='先看白板手绘把过程画出来，再对照下面代码跑一遍动画。'+
+      '<div><button type="button" class="kp-vox" id="kpVoxBtn">▶ 看 VOX：'+esc(vox.title||'本课动画')+'</button></div>';
+  }else{
+    h2='点「▶ 运行 / 播放」，盯变量和数组怎么一步步变。没有单独 VOX 也没关系，动画就是过程。';
+  }
+  add(2,'能不能举例、先看懂过程？', h2);
+  if(kn&&kn.why) add(3,'解决什么问题？', esc(kn.why));
+  else add(3,'解决什么问题？','<span class="kp-skip">本课为重点语法/基础概念，先掌握写法，到算法课会看到它解决具体问题。</span>');
+  add(4,'代码怎么实现？','看左边代码并点「▶ 运行」；改一处再跑，动画会跟着变。语法卡里有格式要点。');
+  if(syn&&syn.length){
+    add(5,'语法要注意什么？',
+      '<ul class="kp-list">'+syn.map(s=>'<li><b>'+esc(s.c)+'</b> — '+esc(s.n)+'</li>').join('')+'</ul>'+
+      '<div style="margin-top:6px"><button type="button" class="kp-vox" style="border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.1);color:#8df0c5" onclick="showSyn&&showSyn()">打开完整语法卡</button></div>');
+  }else{
+    add(5,'语法要注意什么？','<span class="kp-skip">本课语法见代码注释与「📜 语法卡」按钮（若有）。</span>');
+  }
+  const first=(kn&&kn.first&&kn.first.length)?kn.first:[];
+  let h6='';
+  if(first.length) h6='<ol class="kp-list">'+first.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol>';
+  if(state.lesson.tryit) h6+='<div style="margin-top:6px"><b>✋ 试一试：</b>'+esc(state.lesson.tryit)+'</div>';
+  if(!h6) h6='按代码注释改一两个数，点运行看变化。';
+  add(6,'我该如何上手？', h6);
+  if(kn&&kn.where) add(7,'在哪里用得上？', esc(kn.where));
+  else add(7,'在哪里用得上？','<span class="kp-skip">考级选择题、阅读程序写结果；到算法课会接到真实题目。</span>');
+  if(kn&&kn.reflect) add(8,'为什么要学？对我有什么帮助？', esc(kn.reflect));
+  else add(8,'为什么要学？对我有什么帮助？','<span class="kp-skip">打好语法地基，后面算法和项目才写得动。</span>');
+  body.innerHTML=rows.join('');
+  const vb=document.getElementById('kpVoxBtn');
+  if(vb) vb.onclick=safe(()=>{ if(typeof showVoxForLesson==='function') showVoxForLesson(); });
+  // 有 KNOW 或 VOX 时默认展开，方便学生
+  if(kn||vox) el.classList.add('kp-open');
+  el.classList.remove('kp-hide');
+}
+
 function selectLesson(lang,id){
   state.lang=lang;
   let les=null;
@@ -7134,6 +7256,7 @@ function selectLesson(lang,id){
   $('#lessonStory').textContent=les.story;
   $('#lessonTryit').innerHTML=les.tryit? '<b>✋ 试一试：</b>'+esc(les.tryit):'';
   $('#inputChips').innerHTML=(les.inputs&&les.inputs.length)?'<span class="muted">预设输入：</span>'+les.inputs.map(x=>'<span class="chip">'+esc(x)+'</span>').join(' '):'';
+  if(typeof renderKnowPath==='function') renderKnowPath();
   buildSidebar();
   kpIdx=0; updateBubble();
   runCode(true);
@@ -7146,6 +7269,7 @@ function selectFree(){
   $('#lessonStory').textContent=state.lesson.story;
   $('#lessonTryit').textContent='';
   $('#inputChips').innerHTML='';
+  const kp=document.getElementById('knowPath'); if(kp) kp.classList.add('kp-hide');
   buildSidebar();
   runCode(true);
 }
@@ -7515,5 +7639,17 @@ window.addEventListener('DOMContentLoaded',()=>{
 });
 
 </script>
+
+(function(){
+  function bindKp(){
+    const bar=document.getElementById('kpBar');
+    if(!bar||bar._kpBound) return;
+    bar._kpBound=1;
+    bar.onclick=safe(()=>{ const el=document.getElementById('knowPath'); if(el) el.classList.toggle('kp-open'); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bindKp);
+  else bindKp();
+  setTimeout(bindKp,800);
+})();
 </body>
 </html>
