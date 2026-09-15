@@ -3,210 +3,479 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>C++ 算法动画课堂</title>
+<title>夏老师 · 编程可视化课堂 · 按知识点学习</title>
 <style>
   :root {
     --bg:#0f1419; --panel:#1a222c; --line:#2e3d4f;
-    --ink:#e8eef5; --soft:#8b9aab; --cy:#4cc2ff; --am:#ff9f43; --gn:#3dd68c;
+    --ink:#e8eef5; --soft:#8b9aab; --cy:#4cc2ff; --am:#ff9f43; --gn:#3dd68c; --vi:#a78bfa;
   }
   * { box-sizing:border-box; margin:0; padding:0; }
   body {
     font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
-    background:var(--bg); color:var(--ink); min-height:100vh; padding:28px 16px 48px;
+    background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 16px 56px;
   }
-  .wrap { max-width:960px; margin:0 auto; }
-  header { text-align:center; margin-bottom:22px; }
-  h1 { font-size:28px; font-weight:900; letter-spacing:.02em; }
-  .sub { color:var(--soft); font-size:14px; margin-top:6px; line-height:1.6; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+  .wrap { max-width:1080px; margin:0 auto; }
+  header { text-align:center; margin-bottom:18px; }
+  h1 { font-size:26px; font-weight:900; letter-spacing:.02em; }
+  .sub { color:var(--soft); font-size:13.5px; margin-top:6px; line-height:1.65; }
+  .hero {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;
+    margin:16px 0 8px;
+  }
+  .hero a {
+    display:block; text-decoration:none; background:var(--panel); border:1px solid var(--line);
+    border-radius:14px; padding:14px; color:var(--ink); transition:border-color .15s;
+  }
+  .hero a:hover { border-color:var(--cy); }
+  .hero .t { font-size:15px; font-weight:900; color:#fff; margin-bottom:4px; }
+  .hero .d { font-size:12px; color:var(--soft); line-height:1.5; }
+  .hero a.primary { border-color:rgba(61,214,140,.45); background:linear-gradient(160deg,rgba(61,214,140,.12),rgba(76,194,255,.06)); }
+
+  .nav {
+    display:flex; flex-wrap:wrap; gap:6px; justify-content:center;
+    margin:14px 0 22px; position:sticky; top:0; z-index:5;
+    background:rgba(15,20,25,.92); backdrop-filter:blur(8px);
+    padding:10px 4px; border-bottom:1px solid var(--line);
+  }
+  .nav a {
+    font-size:12px; font-weight:800; text-decoration:none; color:var(--soft);
+    padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:var(--panel);
+  }
+  .nav a:hover { color:var(--cy); border-color:var(--cy); }
+
+  section.kp { margin:22px 0 8px; }
+  .kp-h {
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--line);
+  }
+  .kp-h .num {
+    font-size:12px; font-weight:900; color:var(--cy); background:rgba(76,194,255,.12);
+    border:1px solid rgba(76,194,255,.3); padding:2px 8px; border-radius:999px;
+  }
+  .kp-h h2 { font-size:18px; color:#fff; }
+  .kp-h .hint { font-size:12px; color:var(--soft); flex:1; }
+
+  .row { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
   .card {
-    background:var(--panel); border:1px solid var(--line); border-radius:16px;
-    padding:16px; display:flex; flex-direction:column; gap:8px; min-height:170px;
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:14px; display:flex; flex-direction:column; gap:8px;
   }
-  .card h2 { font-size:16px; color:#fff; }
-  .badge {
+  .card h3 { font-size:14.5px; color:#fff; }
+  .card p { font-size:12.5px; color:var(--soft); line-height:1.55; flex:1; }
+  .tag {
     display:inline-block; width:fit-content; font-size:11px; font-weight:700;
-    padding:2px 10px; border-radius:999px;
-    background:rgba(76,194,255,.12); color:var(--cy); border:1px solid rgba(76,194,255,.3);
+    padding:2px 8px; border-radius:999px;
+    background:rgba(76,194,255,.1); color:var(--cy); border:1px solid rgba(76,194,255,.28);
   }
-  .badge.am { background:rgba(255,159,67,.12); color:var(--am); border-color:rgba(255,159,67,.35); }
-  .badge.gn { background:rgba(61,214,140,.12); color:var(--gn); border-color:rgba(61,214,140,.35); }
-  .card p { font-size:13px; color:var(--soft); line-height:1.6; flex:1; }
-  .links { display:flex; gap:8px; flex-wrap:wrap; }
+  .tag.am { background:rgba(255,159,67,.1); color:var(--am); border-color:rgba(255,159,67,.3); }
+  .tag.gn { background:rgba(61,214,140,.1); color:var(--gn); border-color:rgba(61,214,140,.3); }
+  .tag.vi { background:rgba(167,139,250,.1); color:var(--vi); border-color:rgba(167,139,250,.3); }
+  .links { display:flex; gap:6px; flex-wrap:wrap; }
   a.btn {
     display:inline-flex; align-items:center; justify-content:center;
-    padding:8px 12px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:800;
+    padding:7px 11px; border-radius:9px; text-decoration:none; font-size:12.5px; font-weight:800;
     background:linear-gradient(135deg,#3dd68c,#0ea5a5); color:#04121f;
   }
   a.btn.sec {
-    background:rgba(126,164,222,.12); color:var(--ink); border:1px solid var(--line);
+    background:rgba(126,164,222,.1); color:var(--ink); border:1px solid var(--line);
   }
+  a.btn:hover { filter:brightness(1.08); }
   footer {
     margin-top:28px; text-align:center; color:var(--soft); font-size:12px; line-height:1.7;
+    border-top:1px solid var(--line); padding-top:16px;
   }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>C++ 算法动画课堂</h1>
+    <h1>夏老师 · 编程可视化课堂</h1>
     <div class="sub">
-      角色动画先看懂 · 白板片巩固 · 代码骨架落地做题<br/>
-      递归 / 分治 / 贪心 / 结构体 / 数组排序
+      按<b>知识点</b>组织：展示台深链 → VOX 白板片 → 交互动画 → 代码拼装 → 题单 → GESP 真题<br/>
+      建议：先走展示台每课「🧭 学生八问」，再动手做题。基础免费，测验/填空需授权码。
     </div>
   </header>
 
-  <div class="grid">
-    <div class="card">
-      <span class="badge">概念 + 例题</span>
-      <h2>递归</h2>
-      <p>工作台故事 → 递/归 → 甩锅思维 → 三要素；含求和例题、代码三段与 n=5 执行过程。</p>
-      <div class="links">
-        <a class="btn sec" href="videos/recursion.mp4">白板片（已字幕）</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <span class="badge gn">核心 · 解决「看不懂整段代码」</span>
-      <h2>代码拼装器</h2>
-      <p>把 定义 / cmp / 输入 / sort / 输出 拆成积木。点一块 → 完整程序对应行高亮。四套案例：成绩表、归并、VIP、活动选择。</p>
-      <div class="links">
-        <a class="btn" href="assemble.html">打开拼装器</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <span class="badge">全量考级台</span>
-      <h2>编程可视化展示台</h2>
-      <p>Python + C++ 各 6 级约 30 课。基础浏览、代码演示、语法卡、VOX 动画均免费；「考考你 / 填空」等练习测试需授权码。</p>
-      <div class="links">
-        <a class="btn" href="platform.html">打开完整展示台</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <span class="badge gn">VOX 流式笔迹</span>
-      <h2>白板手绘 · 真落笔版</h2>
-      <p>geeklee/srt-whiteboard-animation：笔尖连续落墨 + 手部跟随，先线稿后添彩。空白笔杆，已烧字幕。展示台内点「本课 VOX」也可直接看。</p>
-      <div class="links">
-        <a class="btn" href="videos/vox-merge.mp4">归并</a>
-        <a class="btn sec" href="videos/vox-bubble.mp4">冒泡选择</a>
-        <a class="btn sec" href="videos/vox-insert.mp4">插入</a>
-        <a class="btn sec" href="videos/vox-stack.mp4">栈</a>
-        <a class="btn sec" href="videos/vox-queue.mp4">队列</a>
-        <a class="btn sec" href="videos/vox-linked.mp4">链表</a>
-        <a class="btn sec" href="videos/vox-tree.mp4">二叉树</a>
-        <a class="btn sec" href="videos/vox-bfs.mp4">BFS</a>
-        <a class="btn sec" href="videos/vox-dfs.mp4">DFS</a>
-        <a class="btn sec" href="videos/vox-binary.mp4">二分</a>
-        <a class="btn sec" href="videos/vox-pointer.mp4">指针</a>
-        <a class="btn sec" href="videos/vox-sieve.mp4">埃氏筛</a>
-        <a class="btn sec" href="videos/vox-hanoi.mp4">汉诺塔</a>
-        <a class="btn sec" href="videos/vox-joseph.mp4">约瑟夫</a>
-        <a class="btn sec" href="videos/vox-activity.mp4">活动选择</a>
-        <a class="btn sec" href="videos/vox-change.mp4">找零</a>
-        <a class="btn sec" href="videos/vox-maxsub.mp4">最大子段和</a>
-        <a class="btn sec" href="videos/vox-bits.mp4">位运算</a>
-        <a class="btn sec" href="videos/vox-gcd.mp4">GCD</a>
-        <a class="btn sec" href="videos/vox-bigadd.mp4">高精度</a>
-        <a class="btn sec" href="videos/divide-greedy-vox.mp4">分治</a>
-        <a class="btn sec" href="VOX-管线说明.md">管线说明</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <span class="badge am">递推 vs 递归</span>
-      <h2>两种走法，同一公式</h2>
-      <p>爬楼梯 f(n)=f(n-1)+f(n-2)。递归问下去再答；递推从小到大填表。Python / C++ 双语言对照。</p>
-      <div class="links">
-        <a class="btn" href="recur-vs-iter.html">交互动画</a>
-        <a class="btn sec" href="videos/recur-vs-iter.mp4">VOX 白板片</a>
-        <a class="btn sec" href="notes-recur-vs-iter.md">题单</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <span class="badge gn">难点重做 · 有配音</span>
-      <h2>难懂概念拆解</h2>
-      <p>递归栈「递下去再归上来」；多关键字 cmp「先主键后次键」。每条约 16s，可反复播。</p>
-      <div class="links">
-        <a class="btn" href="videos/hard-recursion-stack.mp4">递归栈</a>
-        <a class="btn" href="videos/hard-cmp-vip.mp4">两级 cmp</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <span class="badge">分治 · 贪心</span>
-      <h2>归并排序 & 活动选择</h2>
-      <p>两摞考卷合并、教室排活动。可单步、可自动播放，代码折叠在「进阶」。</p>
-      <div class="links">
-        <a class="btn" href="divide-greedy.html">交互动画</a>
-        <a class="btn sec" href="videos/divide-greedy.mp4">白板片（已字幕）</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <span class="badge am">结构体 1</span>
-      <h2>档案袋比喻</h2>
-      <p>散装变量 → 结构体打包；定义、创建、点号访问、结构体数组。</p>
-      <div class="links">
-        <a class="btn" href="struct.html">交互动画</a>
-        <a class="btn sec" href="videos/struct-vox.mp4">VOX 白板片</a>
-        <a class="btn sec" href="videos/struct.mp4">旧版片</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <span class="badge am">结构体 2</span>
-      <h2>数组排序 · sort / cmp</h2>
-      <p>交换灾难、默认 sort、cmp 裁判、成绩表排序（P1502 思路）。</p>
-      <div class="links">
-        <a class="btn" href="struct-sort.html">交互动画</a>
-        <a class="btn sec" href="videos/struct-sort.mp4">白板片（已字幕）</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <span class="badge gn">加长</span>
-      <h2>多关键字 VIP 排序</h2>
-      <p>裁判逐步出牌：先比 VIP，同级比到达序号。插入式比较日志。</p>
-      <div class="links">
-        <a class="btn" href="vip-sort.html">逐步演示</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <span class="badge">题单</span>
-      <h2>课堂练习与骨架</h2>
-      <p>C++ 可编译骨架、易错点、递进题单，可直接给学生做作业。算法课建议先走展示台「学习路径 · 学生八问」。</p>
-      <div class="links">
-        <a class="btn sec" href="notes-sort.md">排序</a>
-        <a class="btn sec" href="notes-search.md">二分与搜索</a>
-        <a class="btn sec" href="notes-ds.md">栈队列链表树</a>
-        <a class="btn sec" href="notes-dp-greedy.md">DP与贪心</a>
-        <a class="btn sec" href="notes-math.md">数论位运算</a>
-        <a class="btn sec" href="notes-divide-greedy.md">分治贪心旧版</a>
-        <a class="btn sec" href="notes-struct.md">结构体 1</a>
-        <a class="btn sec" href="notes-struct-sort.md">结构体 2</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <span class="badge am">GESP</span>
-      <h2>官方真题入口</h2>
-      <p>CCF GESP 各期真题 PDF（按级下载）。本站在题单中按知识点标注「建议对照」，真题以官网为准，不转载整卷。</p>
-      <div class="links">
-        <a class="btn" href="https://gesp.ccf.org.cn/101/1010/index.html" target="_blank" rel="noopener">打开真题解析</a>
-        <a class="btn sec" href="https://gesp.ccf.org.cn/101/1008/10012.html" target="_blank" rel="noopener">认证大纲</a>
-      </div>
-    </div>
+  <div class="hero">
+    <a class="primary" href="platform.html">
+      <div class="t">🎬 编程可视化展示台</div>
+      <div class="d">Python + C++ 六级约 88 课。每课：故事 · 动画 · 语法卡 · 学生八问 · VOX。</div>
+    </a>
+    <a href="assemble.html">
+      <div class="t">🧩 代码拼装器</div>
+      <div class="d">概念 → 整段程序。成绩表 / 归并 / VIP / 活动 / 二分 / 汉诺塔。</div>
+    </a>
+    <a href="https://gesp.ccf.org.cn/101/1010/index.html" target="_blank" rel="noopener">
+      <div class="t">📜 GESP 官方真题</div>
+      <div class="d">CCF 各期 PDF，按级下载。题单已标「建议对照」。</div>
+    </a>
+    <a href="https://gesp.ccf.org.cn/101/1008/10012.html" target="_blank" rel="noopener">
+      <div class="t">📋 认证大纲</div>
+      <div class="d">对照考纲查自己还缺哪块知识点。</div>
+    </a>
   </div>
 
+  <nav class="nav">
+    <a href="#kp-rec">递归递推</a>
+    <a href="#kp-sort">排序查找</a>
+    <a href="#kp-struct">结构体</a>
+    <a href="#kp-dc">分治贪心</a>
+    <a href="#kp-ds">栈队链树</a>
+    <a href="#kp-search">搜索</a>
+    <a href="#kp-ptr">指针引用</a>
+    <a href="#kp-dp">动态规划</a>
+    <a href="#kp-math">数论位运算</a>
+    <a href="#kp-notes">题单总表</a>
+  </nav>
+
+  <!-- ① 递归递推 -->
+  <section class="kp" id="kp-rec">
+    <div class="kp-h">
+      <span class="num">01</span><h2>递归与递推</h2>
+      <span class="hint">函数自己调自己 · 爬楼梯 · 汉诺塔 · 调用栈</span>
+    </div>
+    <div class="row">
+      <div class="card">
+        <span class="tag">展示台</span>
+        <h3>递归 · 阶乘 / 套娃</h3>
+        <p>边界、递推式、归上来。看调用栈最深几层。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=py4-1">Python 递归</a>
+          <a class="btn sec" href="platform.html?lesson=cpp4-1">C++ 递归</a>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag am">展示台 + 专页</span>
+        <h3>递推 vs 递归（爬楼梯）</h3>
+        <p>同一公式 f(n)=f(n-1)+f(n-2)，两种走法。双语言对照。</p>
+        <div class="links">
+          <a class="btn" href="recur-vs-iter.html">交互动画</a>
+          <a class="btn sec" href="platform.html?lesson=py4-3">展示台 · 递推</a>
+          <a class="btn sec" href="videos/recur-vs-iter.mp4">VOX</a>
+          <a class="btn sec" href="videos/hard-recursion-stack.mp4">递归栈 VOX</a>
+          <a class="btn sec" href="notes-recur-vs-iter.md">题单</a>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag gn">展示台 + 拼装</span>
+        <h3>汉诺塔</h3>
+        <p>n-1 挪中转 → 搬最大 → n-1 叠回。最少 2ⁿ−1 步。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp6-5">C++ 汉诺塔</a>
+          <a class="btn sec" href="platform.html?lesson=py5-5">Python 汉诺塔</a>
+          <a class="btn sec" href="videos/vox-hanoi.mp4">VOX</a>
+          <a class="btn sec" href="assemble.html">拼装器</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 排序查找 -->
+  <section class="kp" id="kp-sort">
+    <div class="kp-h">
+      <span class="num">02</span><h2>排序与查找</h2>
+      <span class="hint">冒泡 · 选择 · 插入 · 归并 · 二分</span>
+    </div>
+    <div class="row">
+      <div class="card">
+        <span class="tag">O(n²) 三件套</span>
+        <h3>冒泡 / 选择 / 插入</h3>
+        <p>相邻冒泡、每轮选最小、摸牌插入。对比交换次数。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp5-1">C++ 冒泡</a>
+          <a class="btn sec" href="platform.html?lesson=cpp5-2">C++ 选择</a>
+          <a class="btn sec" href="platform.html?lesson=py5-2">Py 插入</a>
+          <a class="btn sec" href="videos/vox-bubble.mp4">VOX 冒泡选择</a>
+          <a class="btn sec" href="videos/vox-insert.mp4">VOX 插入</a>
+          <a class="btn sec" href="notes-sort.md">题单</a>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag gn">分治 · O(n log n)</span>
+        <h3>归并排序</h3>
+        <p>对半拆到单元素，双指针谁小取谁。稳定排序。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp5-6">C++ 归并</a>
+          <a class="btn sec" href="platform.html?lesson=py5-6">Py 归并</a>
+          <a class="btn sec" href="videos/vox-merge.mp4">VOX</a>
+          <a class="btn sec" href="divide-greedy.html">交互动画</a>
+          <a class="btn sec" href="assemble.html">拼装器</a>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag am">有序才能二分</span>
+        <h3>二分查找</h3>
+        <p>lo/hi 夹逼，每次排除一半。100 个数最多 7 次。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp5-3">C++ 二分</a>
+          <a class="btn sec" href="platform.html?lesson=py5-3">Py 二分</a>
+          <a class="btn sec" href="videos/vox-binary.mp4">VOX</a>
+          <a class="btn sec" href="assemble.html">拼装器</a>
+          <a class="btn sec" href="notes-search.md">题单</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 结构体 -->
+  <section class="kp" id="kp-struct">
+    <div class="kp-h">
+      <span class="num">03</span><h2>结构体与多关键字</h2>
+      <span class="hint">打包数据 · sort/cmp · VIP 双关键字</span>
+    </div>
+    <div class="row">
+      <div class="card">
+        <span class="tag">档案袋</span>
+        <h3>结构体入门</h3>
+        <p>散装变量打包成类型；点号访问；结构体数组。</p>
+        <div class="links">
+          <a class="btn" href="struct.html">交互动画</a>
+          <a class="btn sec" href="platform.html?lesson=cpp4-6">展示台</a>
+          <a class="btn sec" href="videos/struct-vox.mp4">VOX</a>
+          <a class="btn sec" href="notes-struct.md">题单</a>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag am">sort + cmp</span>
+        <h3>结构体排序</h3>
+        <p>cmp 裁判；成绩表按分数排（P1502 思路）。</p>
+        <div class="links">
+          <a class="btn" href="struct-sort.html">交互动画</a>
+          <a class="btn sec" href="videos/struct-sort.mp4">白板片</a>
+          <a class="btn sec" href="videos/hard-cmp-vip.mp4">两级 cmp VOX</a>
+          <a class="btn sec" href="notes-struct-sort.md">题单</a>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag gn">加长</span>
+        <h3>多关键字 VIP</h3>
+        <p>先比 VIP，同级比到达序号。逐步比较日志。</p>
+        <div class="links">
+          <a class="btn" href="vip-sort.html">逐步演示</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ 分治贪心 -->
+  <section class="kp" id="kp-dc">
+    <div class="kp-h">
+      <span class="num">04</span><h2>分治与贪心</h2>
+      <span class="hint">拆开解决再合并 · 每步局部最优</span>
+    </div>
+    <div class="row">
+      <div class="card">
+        <span class="tag">分治总览</span>
+        <h3>分解 · 解决 · 合并</h3>
+        <p>两摞考卷合并；教室活动时间轴。</p>
+        <div class="links">
+          <a class="btn" href="divide-greedy.html">交互动画</a>
+          <a class="btn sec" href="videos/divide-greedy-vox.mp4">VOX</a>
+          <a class="btn sec" href="videos/divide-greedy.mp4">白板片</a>
+          <a class="btn sec" href="notes-divide-greedy.md">题单</a>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag am">贪心</span>
+        <h3>活动选择 / 找零钱</h3>
+        <p>按结束时间排序能接就选；大面额优先凑零钱。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp5-7">活动选择</a>
+          <a class="btn sec" href="platform.html?lesson=cpp6-3">找零</a>
+          <a class="btn sec" href="videos/vox-activity.mp4">VOX 活动</a>
+          <a class="btn sec" href="videos/vox-change.mp4">VOX 找零</a>
+          <a class="btn sec" href="assemble.html">拼装器</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 栈队链树 -->
+  <section class="kp" id="kp-ds">
+    <div class="kp-h">
+      <span class="num">05</span><h2>栈 · 队列 · 链表 · 二叉树</h2>
+      <span class="hint">受限操作 · 改线不搬家 · 根左右</span>
+    </div>
+    <div class="row">
+      <div class="card">
+        <span class="tag">LIFO / FIFO</span>
+        <h3>栈与队列</h3>
+        <p>括号匹配用栈；BFS 底层用队列。对照学更牢。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp6-4">C++ 栈</a>
+          <a class="btn sec" href="platform.html?lesson=cpp6-6">C++ 队列</a>
+          <a class="btn sec" href="videos/vox-stack.mp4">VOX 栈</a>
+          <a class="btn sec" href="videos/vox-queue.mp4">VOX 队列</a>
+          <a class="btn sec" href="notes-ds.md">题单</a>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag gn">链表</span>
+        <h3>单链表 · 改线不搬家</h3>
+        <p>head→结点→NULL；删除是前驱 next 跨过。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp5-8">C++ 数组模拟</a>
+          <a class="btn sec" href="platform.html?lesson=py5-7">Py 链表</a>
+          <a class="btn sec" href="videos/vox-linked.mp4">VOX</a>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag vi">树</span>
+        <h3>二叉树前序</h3>
+        <p>根→左→右；left/right 指针递归进子树。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp6-9">展示台</a>
+          <a class="btn sec" href="videos/vox-tree.mp4">VOX</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ 搜索 -->
+  <section class="kp" id="kp-search">
+    <div class="kp-h">
+      <span class="num">06</span><h2>搜索</h2>
+      <span class="hint">BFS 一层层淹 · DFS 一条路走到黑</span>
+    </div>
+    <div class="row">
+      <div class="card">
+        <span class="tag">最短路</span>
+        <h3>BFS 迷宫</h3>
+        <p>队列按层扩散，第一次到终点即最短。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp6-7">展示台</a>
+          <a class="btn sec" href="videos/vox-bfs.mp4">VOX</a>
+          <a class="btn sec" href="notes-search.md">题单</a>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag am">回溯</span>
+        <h3>DFS 全排列</h3>
+        <p>每层选没用过的；选满输出后擦 used 回头。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp6-8">展示台</a>
+          <a class="btn sec" href="videos/vox-dfs.mp4">VOX</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑦ 指针 -->
+  <section class="kp" id="kp-ptr">
+    <div class="kp-h">
+      <span class="num">07</span><h2>指针与引用</h2>
+      <span class="hint">门牌号 · 别名 · 真交换</span>
+    </div>
+    <div class="row">
+      <div class="card">
+        <span class="tag">C++ 灵魂</span>
+        <h3>指针 / 引用 / 指针遍历</h3>
+        <p>p 存地址像门牌；& 传别名才能改本体；数组地址连续。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp4-2">指针</a>
+          <a class="btn sec" href="platform.html?lesson=cpp4-3">引用</a>
+          <a class="btn sec" href="platform.html?lesson=cpp4-5">指针遍历</a>
+          <a class="btn sec" href="videos/vox-pointer.mp4">VOX</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑧ DP -->
+  <section class="kp" id="kp-dp">
+    <div class="kp-h">
+      <span class="num">08</span><h2>动态规划入门</h2>
+      <span class="hint">状态 · 转移 · 边界</span>
+    </div>
+    <div class="row">
+      <div class="card">
+        <span class="tag gn">一维 DP</span>
+        <h3>爬楼梯 / 最大子段和</h3>
+        <p>dp[i] 用前面推出；接上还是另起，谁大听谁。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp6-1">爬楼梯</a>
+          <a class="btn sec" href="platform.html?lesson=py6-3">最大子段和</a>
+          <a class="btn sec" href="videos/vox-maxsub.mp4">VOX 子段和</a>
+          <a class="btn sec" href="notes-dp-greedy.md">题单</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑨ 数论位运算 -->
+  <section class="kp" id="kp-math">
+    <div class="kp-h">
+      <span class="num">09</span><h2>数论与位运算</h2>
+      <span class="hint">GCD · 筛质数 · 灯泡遥控 · 高精度 · 约瑟夫</span>
+    </div>
+    <div class="row">
+      <div class="card">
+        <span class="tag">数论</span>
+        <h3>GCD / 埃氏筛 / 高精度</h3>
+        <p>辗转相除；关灯筛质数；大数竖式进位。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp5-11">GCD</a>
+          <a class="btn sec" href="platform.html?lesson=cpp5-4">埃氏筛</a>
+          <a class="btn sec" href="platform.html?lesson=cpp6-2">高精度</a>
+          <a class="btn sec" href="videos/vox-gcd.mp4">VOX GCD</a>
+          <a class="btn sec" href="videos/vox-sieve.mp4">VOX 筛</a>
+          <a class="btn sec" href="videos/vox-bigadd.mp4">VOX 高精</a>
+          <a class="btn sec" href="notes-math.md">题单</a>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag am">位运算 / 模拟</span>
+        <h3>灯泡遥控 · 约瑟夫环</h3>
+        <p>& | ^ 与移位；围圈报数取余绕圈。</p>
+        <div class="links">
+          <a class="btn" href="platform.html?lesson=cpp5-5">位运算</a>
+          <a class="btn sec" href="platform.html?lesson=py6-5">约瑟夫</a>
+          <a class="btn sec" href="videos/vox-bits.mp4">VOX 位</a>
+          <a class="btn sec" href="videos/vox-joseph.mp4">VOX 约瑟夫</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 题单总表 -->
+  <section class="kp" id="kp-notes">
+    <div class="kp-h">
+      <span class="num">10</span><h2>题单与骨架总表</h2>
+      <span class="hint">可直接当作业；对照 GESP 真题</span>
+    </div>
+    <div class="row">
+      <div class="card">
+        <span class="tag">作业包</span>
+        <h3>按专题下载</h3>
+        <p>每份含：概念表、C++ 骨架、递进题、易错点、GESP 对照建议。</p>
+        <div class="links">
+          <a class="btn sec" href="notes-sort.md">排序</a>
+          <a class="btn sec" href="notes-search.md">查找搜索</a>
+          <a class="btn sec" href="notes-ds.md">数据结构</a>
+          <a class="btn sec" href="notes-dp-greedy.md">DP贪心</a>
+          <a class="btn sec" href="notes-math.md">数论位运算</a>
+          <a class="btn sec" href="notes-recur-vs-iter.md">递推递归</a>
+          <a class="btn sec" href="notes-struct.md">结构体1</a>
+          <a class="btn sec" href="notes-struct-sort.md">结构体2</a>
+          <a class="btn sec" href="notes-divide-greedy.md">分治贪心</a>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag vi">说明</span>
+        <h3>怎么用这套站</h3>
+        <p>1. 打开展示台选知识点<br/>2. 走「学生八问」（VOX 在第 2 步）<br/>3. 拼装器看整段<br/>4. 做题单<br/>5. 刷 GESP 同级真题</p>
+        <div class="links">
+          <a class="btn" href="platform.html">回展示台</a>
+          <a class="btn sec" href="VOX-管线说明.md">VOX 管线</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer>
-    建议学习顺序：交互动画（先懂）→ 白板片（巩固）→ <b>代码拼装器</b>（看懂整段）→ 展示台/题单（动手）<br/>
-    纯静态页，无外网依赖，可投影上课。
+    基础浏览 · 代码演示 · 语法卡 · VOX 免费｜「考考你 / 填空」需授权码（微信找夏老师）<br/>
+    纯静态页，可投影上课 · 课件署名夏老师 18673538889
   </footer>
 </div>
 </body>
 </html>
-
