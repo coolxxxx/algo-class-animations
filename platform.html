@@ -6710,10 +6710,58 @@ const KNOW = {
   'cpp6-2': { why:'int 装不下超大整数，用数组竖式相加。', where:'高精度加法/乘法、压位高精度。', reflect:'「拆成一位一位」是处理超规模数据的通用拆解法。', first:['倒序存数组','逐位加满十进一','测 999+1'] },
 };
 
+
+/* ============================================================
+ * GESP：按官方大纲与近年真题（含 2026-09）归纳的「怎么考/怎么破」
+ * 不是转载整卷，是出题模式与解题策略
+ * ============================================================ */
+const GESP = {
+  'py1-1': { lv:'Python一级', how:'选择题：变量赋值后输出结果；改一行看输出变不变', tip:'先当草稿纸手算再对代码；注意 = 是赋值不是相等', setter:'考「名字和值」是否分清', do:'先写变量表再跑代码' },
+  'py2-1': { lv:'Python二级', how:'阅读 for+range 写输出；问循环几次', tip:'range 含头不含尾；先列 i 的取值再展开循环体', setter:'考边界会不会数错', do:'把 i 逐个写在纸上再执行' },
+  'py2-3': { lv:'Python二级/三级', how:'列表 append/pop 后长度与内容', tip:'从 0 开始数下标；pop 默认删最后一个', setter:'考容器操作是否熟练', do:'画一条格子标下标' },
+  'py3-2': { lv:'Python三级', how:'给乱序数组，问某轮之后序列/交换次数', tip:'盯「这一轮结束谁到位」；冒泡一轮最大到末尾', setter:'考过程而不是只记结论', do:'手推一轮，别心算全程' },
+  'py3-3': { lv:'Python三级', how:'字典计数投票；遍历输出票数', tip:'键不存在先判断或 setdefault；count[k]+=1', setter:'考键值映射', do:'先画「名字→票数」表' },
+  'py4-1': { lv:'Python四级', how:'递归函数写输出/填返回值；阶乘、斐波那契', tip:'先找出口 n==1 或 n<=2，再写递推式', setter:'考会不会「问到底再答」', do:'画套娃/调用树，标出返回值' },
+  'py4-2': { lv:'Python四级', how:'斐波那契第 n 项；或阅读递归数调用次数', tip:'1,1 起步；第 n 项是 f(n-1)+f(n-2)；递归会重复算很多次', setter:'考递推式与边界', do:'列前 6 项对照' },
+  'py4-3': { lv:'Python四级', how:'爬楼梯类递推填空/写 dp', tip:'dp[i] 用前两项；边界 dp[1] dp[2] 别写错', setter:'考 DP 入门三件套', do:'先写公式再写循环' },
+  'py4-4': { lv:'Python四级', how:'类与对象：属性方法、self 是谁', tip:'先看用哪个类实例化；self 指当前对象', setter:'考面向对象入门', do:'把对象画成卡片标属性' },
+  'py5-3': { lv:'Python五级', how:'有序数组二分查找结果或 mid 取值', tip:'mid 偏哪边由 lo/hi 决定；找不到返回约定值', setter:'考夹逼过程', do:'表格式记录 lo hi mid' },
+  'py5-5': { lv:'Python五级', how:'汉诺塔步数 2^n-1；或阅读 move 输出序列', tip:'先 n-1 到中转，搬最大，再 n-1 叠回', setter:'考递归模型', do:'n=3 手推 7 步' },
+  'py5-6': { lv:'Python五级', how:'归并合并结果；分治思想选择', tip:'合并时两摞比最上张', setter:'考分治「合」', do:'双指针手推一轮' },
+  'py6-1': { lv:'Python六级', how:'括号匹配判断；栈操作序列后栈内容', tip:'遇左压右弹；弹空前要判空', setter:'考 LIFO', do:'画栈竖着画' },
+  'py6-3': { lv:'Python六级', how:'最大子段和；问某下标 dp 值', tip:'接上或另起取 max；注意全负', setter:'考状态定义', do:'表格式跟算 dp[i]' },
+  'py6-4': { lv:'Python五级/六级', how:'筛质数个数；判断 n 是否质数的边界', tip:'只筛到 √n；i*i 可能溢出用 i*i<=n 或 i<=n//i', setter:'考优化边界', do:'先手筛 30 以内' },
+  'py6-5': { lv:'Python六级', how:'约瑟夫最后留下编号', tip:'下标取模绕圈；出局 pop 后下标不 +1', setter:'考环形模拟', do:'n=5 k=2 手推' },
+  'py6-6': { lv:'Python六级', how:'活动选择最多几个；排序键是否正确', tip:'必须按结束时间排，不是开始时间', setter:'考贪心正确性', do:'时间轴画绿条' },
+  'cpp1-1': { lv:'C++一级', how:'程序结构、输出语句对错', tip:'main 是大门；cout 连续输出', setter:'考骨架', do:'默写 Hello 骨架' },
+  'cpp2-1': { lv:'C++二级', how:'if-else 分支输出；else if 漏写后果', tip:'命中一个就跳过其余', setter:'考分支', do:'用分数 59/60/90 试' },
+  'cpp3-1': { lv:'C++三级', how:'数组下标读写；越界会怎样', tip:'合法下标 0..n-1', setter:'考下标意识', do:'先画柜子编号' },
+  'cpp3-2': { lv:'C++三级', how:'打擂台求最大及下标', tip:'mx 初值与是否记下标', setter:'考一遍扫描', do:'跟循环写 mx 变化表' },
+  'cpp3-8': { lv:'C++三级', how:'位运算结果：& | ^ << >>', tip:'先写成 8 位二进制再算', setter:'考「位」不是「数」', do:'把数字当灯泡画' },
+  'cpp4-1': { lv:'C++四级', how:'递归输出/填空；阶乘、斐波那契', tip:'出口 + 递推式；类型用 long long 防溢出', setter:'考递归三要素', do:'画返回值树' },
+  'cpp4-2': { lv:'C++四级', how:'指针指向、*p 取值、改 *p 后原变量', tip:'& 取地址，* 按地址取内容', setter:'考间接访问', do:'画门牌号箭头' },
+  'cpp4-3': { lv:'C++四级', how:'引用传参交换是否成功', tip:'值传递是复印件；加 & 才是本体', setter:'考传参方式', do:'对比两版 swap' },
+  'cpp4-6': { lv:'C++四级', how:'结构体定义与点号访问；结构体数组', tip:'先定义类型再创建对象', setter:'考打包', do:'画档案袋卡片' },
+  'cpp5-1': { lv:'C++五级', how:'冒泡/选择排序结果或比较交换次数', tip:'内层上界 n-1-i；选择每轮换一次', setter:'考过程模拟', do:'手推一轮' },
+  'cpp5-3': { lv:'C++五级', how:'二分 mid 与 lo/hi 更新', tip:'mid = lo+(hi-lo)/2', setter:'考夹逼', do:'表格记录' },
+  'cpp5-4': { lv:'C++五级', how:'2026-09：isPrime 横线最佳写法选 i*i 边界', tip:'i*i<=n 且注意溢出用 long long', setter:'考优化与边界', do:'想 n=2、n=4、大 n' },
+  'cpp5-6': { lv:'C++五级', how:'归并合并；分治递归结构', tip:'msort 分，merge 合', setter:'考分治', do:'跟一次 merge 写 tmp' },
+  'cpp5-8': { lv:'C++五级', how:'2026-09：链表插入/删除时间复杂度、改指针代码', tip:'改线不搬家；删结点先接前驱再 delete', setter:'考指针操作顺序', do:'画图再写代码' },
+  'cpp5-10': { lv:'C++五级', how:'真指针链表：new / -> / 空指针', tip:'访问前判空；尾结点 next 为 nullptr', setter:'考堆上结点', do:'画堆区方块' },
+  'cpp5-11': { lv:'C++五级', how:'2026-09：gcd(105,45) 单选；给递归式算结果', tip:'105%45=15, 45%15=0 → 15；不要跳步', setter:'考会不会读递归 gcd', do:'纸笔列 a,b, a%b 直到 b=0' },
+  'cpp6-1': { lv:'C++六级', how:'爬楼梯/一维 DP 填表或写输出', tip:'dp[i]=dp[i-1]+dp[i-2]，边界写对', setter:'考 DP', do:'先填 1..n 表' },
+  'cpp6-4': { lv:'C++六级', how:'括号匹配；栈 top 指针变化', tip:'入栈先用再 ++ 或后 ++ 分清', setter:'考栈指针', do:'画 top 数值变化' },
+  'cpp6-6': { lv:'C++六级', how:'STL stack/queue 操作后队头栈顶', tip:'queue front 看头 pop 弹头；stack top 看顶', setter:'考 STL 语义', do:'列操作序列画容器' },
+  'cpp6-7': { lv:'C++六级', how:'迷宫最短步数；BFS 层数', tip:'第一次到终点步数最短；要标记已访问', setter:'考 BFS', do:'按层涂色' },
+  'cpp6-8': { lv:'C++六级', how:'全排列个数/输出顺序；回溯 used', tip:'选满输出后 used 要清 0', setter:'考回溯', do:'n=3 树状图' },
+  'cpp6-9': { lv:'C++六级', how:'二叉树前序/中序序列', tip:'根左右口诀；空结点不输出', setter:'考遍历', do:'在树上描边' },
+};
+
 const VOX_MAP = {
   // 递归
-  'cpp4-1': { title:'递归栈 · 递下去再归上来', url:'videos/hard-recursion-stack.mp4' },
-  'py4-1':  { title:'递归栈 · 递下去再归上来', url:'videos/hard-recursion-stack.mp4' },
+  'cpp4-1': { title:'套娃递归 · 打开再合上', url:'videos/vox-nest.mp4' },
+  'py4-1':  { title:'套娃递归 · 打开再合上', url:'videos/vox-nest.mp4' },
+  'py4-2':  { title:'斐波那契兔子园', url:'videos/vox-fib.mp4' },
   'py4-3':  { title:'递推 vs 递归', url:'videos/recur-vs-iter.mp4' },
   'cpp6-1': { title:'递推 vs 递归（爬楼梯）', url:'videos/recur-vs-iter.mp4' },
   // 排序
@@ -7260,14 +7308,18 @@ function renderKnowPath(){
   const syn=(typeof SYN!=='undefined' && SYN[id])||null;
   // 至少有 story 的课都显示路径；KNOW 让 3/6/7/8 变实
   const rows=[];
-  const add=(n,ask,html)=>{ rows.push('<div class="kp-q"><div class="kp-n">'+n+'</div><div><div class="kp-ask">'+ask+'</div><div class="kp-ans">'+html+'</div></div></div>'); };
+  const add=(n,ask,html)=>{ const label=String(n); const cls=(label==='G')?'kp-n kp-n-g':'kp-n'; rows.push('<div class="kp-q"><div class="'+cls+'">'+(label==='G'?'考':label)+'</div><div><div class="kp-ask">'+ask+'</div><div class="kp-ans">'+html+'</div></div></div>'); };
   add(1,'这是什么意思？', esc(state.lesson.story||''));
+  const sceneMap={vars:'变量',array:'数组',bars:'排序条',table:'表格',string:'字符串',dict:'计数板',stack:'调用/套娃层',memory:'内存',turtle:'画笔',output:'输出台',hanoi:'汉诺塔盘',grid:'点阵',emoji:'兔子园',gauge:'水位',light:'红绿灯',boxes:'变量盒',timeline:'时间轴',linkedlist:'链表',tree:'二叉树'};
   let h2='';
   if(vox){
-    h2='先看白板手绘把过程画出来，再对照下面代码跑一遍动画。'+
+    h2='先看白板手绘把过程画出来，再点「▶ 运行」对照代码看动画怎么变。'+
       '<div><button type="button" class="kp-vox" id="kpVoxBtn">▶ 看 VOX：'+esc(vox.title||'本课动画')+'</button></div>';
   }else{
-    h2='点「▶ 运行 / 播放」，盯变量和数组怎么一步步变。没有单独 VOX 也没关系，动画就是过程。';
+    const names=(state.lesson.scenes||[]).map(s=>sceneMap[s.type]||s.type);
+    h2='本课没有单独 VOX，但有课堂动画：点「▶ 运行 / 播放」。'+
+      (names.length?' 请盯住：'+esc(names.join(' + '))+'。':'')+
+      ' 一步步看它怎么变，比只读故事有用。';
   }
   add(2,'能不能举例、先看懂过程？', h2);
   if(kn&&kn.why) add(3,'解决什么问题？', esc(kn.why));
@@ -7286,6 +7338,17 @@ function renderKnowPath(){
   if(!h6) h6='按代码注释改一两个数，点运行看变化。';
   add(6,'我该如何上手？', h6);
   if(kn&&kn.where) add(7,'在哪里用得上？', esc(kn.where));
+  const ge=(typeof GESP!=='undefined' && GESP[id])||null;
+  if(ge){
+    add('G','GESP 怎么考 · 怎么破？',
+      '<b>'+esc(ge.lv)+'</b>　'+esc(ge.how)+
+      '<ul class="kp-list">'+
+      '<li><b>注意</b>：'+esc(ge.tip)+'</li>'+
+      '<li><b>出题思路</b>：'+esc(ge.setter)+'</li>'+
+      '<li><b>做题方法</b>：'+esc(ge.do)+'</li>'+
+      '</ul>'+
+      '<div style="margin-top:6px"><a class="kp-vox" href="https://gesp.ccf.org.cn/101/1010/index.html" target="_blank" rel="noopener">去官网刷同级真题</a></div>');
+  }
   if(kn&&kn.reflect) add(8,'为什么要学？对我有什么帮助？', esc(kn.reflect));
   body.innerHTML=rows.join('');
   const vb=document.getElementById('kpVoxBtn');
