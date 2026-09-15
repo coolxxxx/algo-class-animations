@@ -2945,7 +2945,7 @@ basket.pop()
 print("拿走一个后:", basket)` },
         { id:'py2-4', title:'列表与循环 · 算平均分', story:'for s in scores 表示"挨个取出列表里的每个成绩"。这是编程里最常见的套路之一：遍历 + 累加。',
           tryit:'在列表里加一个成绩 88，看总分和平均分怎么变。',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'array',watch:['scores']},{type:'vars'}],
           code:`scores = [90, 85, 77, 96, 60]
 total = 0
 
@@ -2969,7 +2969,7 @@ for ch in word:
 print("元音个数:", n)` },
         { id:'py2-6', title:'逻辑运算符 · 过山车安检', story:'and 是"并且"（两个条件都要满足），or 是"或者"（满足一个就行），not 是"反着来"。过山车要求：身高不低于120 并且 年满8岁——少一个都不行！',
           tryit:'把 h 改成 115 或 age 改成 7，看看还能不能玩。',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'boxes'},{type:'light',watch:['light']}],
           code:`h = 125
 age = 9
 
@@ -2981,7 +2981,7 @@ print("能免票:", free_ticket)
 print("不能玩:", not can_ride)` },
         { id:'py2-7', title:'break 与猜数字 · 心灵感应', story:'while True 是"永远循环"，但 break 是紧急出口：一猜中就跳出。这是游戏、菜单程序最常用的套路。',
           tryit:'把 secret 改成别的数，再看猜了几次才中。',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'boxes'},{type:'output'}],
           code:`secret = 7
 guess = 1
 
@@ -3036,7 +3036,7 @@ for name in count:
     print(name, "得", count[name], "票")` },
         { id:'py3-4', title:'嵌套循环 · 九九乘法表', story:'循环里面套循环：外层 i 管"第几行"，内层 j 管"这一行打几列"。内层循环每完整跑完一轮，外层才走下一步。',
           tryit:'把内层的 i + 1 改成 i + 2，看看每行少打了什么。',
-          scenes:[{type:'output'}],
+          scenes:[{type:'string',watch:['row']},{type:'output'}],
           code:`for i in range(1, 10):
     row = ""
     for j in range(1, i + 1):
@@ -3073,7 +3073,7 @@ for b in bits:
 print("二进制是:", result)` },
         { id:'py3-7', title:'元组 · 刻在石头上的坐标', story:'元组和列表是双胞胎，但元组"刻在石头上"——创建后不能改！适合存坐标 (3,5)、RGB颜色 (255,128,0) 这种不该被改的数据。还能一行拆包：x, y = point。',
           tryit:'加一行 point[0] = 9 试试，程序会"抗议"（元组不可修改）。',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'boxes'},{type:'vars'}],
           code:`point = (3, 5)
 rgb = (255, 128, 0)
 
@@ -3083,7 +3083,7 @@ print("颜色:", rgb)
 print("坐标个数:", len(point))` },
         { id:'py3-8', title:'random 随机数 · 程序会掷骰子', story:'random 是 Python 的"骰子库"：randint(1,100) 掷出 1~100 的整数，choice 从列表里随机抽一个，shuffle 把列表洗牌。游戏、抽奖、出题程序全靠它！每次运行结果都不一样——这就是随机。',
           tryit:'多做几次「▶ 运行」，每次的骰子和洗牌结果都不同。',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'array',watch:['nums']},{type:'vars'}],
           code:`import random
 
 answer = random.randint(1, 100)
@@ -3097,7 +3097,7 @@ pick = random.choice(["苹果", "香蕉", "橘子"])
 print("随机抽到:", pick)` },
         { id:'py3-9', title:'集合 set · 自动的"去重器"', story:'集合像一支"不许重复"的队伍：放进去的元素自动去重、乱序站队。in 判断超快（是集合的看家本领），& 求共同好友、| 求合并名单。统计"班级里出现过的不同数字"用它最省事！',
           tryit:'在 set 里多放几个重复数字，看输出会怎样（自动去重）。',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'boxes'},{type:'vars'}],
           code:`a = set([1, 2, 2, 3])
 print("去重后:", a)
 a.add(4)
@@ -3164,7 +3164,7 @@ cat.say()
 dog.say()` },
         { id:'py4-5', title:'异常处理 · 安全气囊', story:'try 就像汽车的气囊区：正常时气囊不动，一旦"除以 0"这样的意外发生，except 立刻接住，程序不至于当场崩溃，还能继续往下跑。',
           tryit:'把 b 改成 2，看看 try 里的代码正常执行、except 被跳过。',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'boxes'},{type:'output'}],
           code:`a = 10
 b = 0
 
@@ -3176,7 +3176,7 @@ except ZeroDivisionError:
 print("程序还在继续运行")` },
         { id:'py4-6', title:'文件读写 · 程序的记事本', story:'程序结束后变量就消失了，想让数据"留下来"就要写进文件：open("文件","w") 打开记事本，write() 写内容，close() 合上；下次用 "r" 模式打开、read() 就能读回来。这是数据持久化的第一步（四级考点）！',
           tryit:'多写一行 f.write("\\n明天要复习链表。")，看读回来的内容变多。',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'boxes'},{type:'output'}],
           code:`f = open("diary.txt", "w")
 f.write("今天学会了链表!")
 f.close()
@@ -3553,7 +3553,7 @@ for p in pets:
       { lv: 1, title: '第1级 · 初识C++', desc: '程序框架、变量、输入输出、运算', lessons: [
         { id:'cpp1-1', title:'第一个程序 · Hello 派森猫', story:'每个 C++ 程序都有固定骨架：#include 引入工具箱，main 是程序的大门——所有故事都从 main 里开始讲。cout 是程序的"嘴巴"，endl 是换行。',
           tryit:'把 "Hello, 派森猫!" 改成你自己的问候语。',
-          scenes:[{type:'output'}],
+          scenes:[{type:'output'},{type:'vars'}],
           code:`#include <iostream>
 using namespace std;
 
@@ -3646,7 +3646,7 @@ int main() {
 }` },
         { id:'cpp2-4', title:'嵌套循环 · 九九乘法表', story:'外层循环控制行，内层循环控制列。内层每完整转一圈，外层才前进一步——两钟表齿轮咬合转动。',
           tryit:'把内层 j <= i 改成 j <= 9，看打印出什么形状。',
-          scenes:[{type:'output'}],
+          scenes:[{type:'string',watch:['row']},{type:'output'}],
           code:`#include <iostream>
 using namespace std;
 
@@ -3661,7 +3661,7 @@ int main() {
 }` },
         { id:'cpp2-5', title:'逻辑运算符 · 三重安检门', story:'&& 是"并且"（都满足才通过），|| 是"或者"（有一个就行），! 是"取反"。注意 C++ 里真输出 1、假输出 0！',
           tryit:'把 h 改成 115 或 age 改成 7，看 canRide 变成 0。',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'boxes'}],
           code:`#include <iostream>
 using namespace std;
 
@@ -3785,7 +3785,7 @@ int main() {
 }` },
         { id:'cpp3-7', title:'进制转换 · 按权展开', story:'二进制变回十进制用"按权展开"：从左往右读，读到一位就把已有结果×2 再加上这一位——读 1101：1→3→6→13！这是短除法的逆过程，也是二进制的灵魂。',
           tryit:'把 bin 改成 "11001"，看看是不是 25？',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'string',watch:['bin']},{type:'vars'}],
           code:`#include <iostream>
 #include <string>
 using namespace std;
@@ -3802,7 +3802,7 @@ int main() {
 }` },
         { id:'cpp3-8', title:'位运算 · 判奇偶与乘除（三级考点）', story:'位运算是和计算机"母语"对话：n & 1 看"末位是几"就能判奇偶；<< 1 左移一位等于 ×2；>> 1 右移一位等于 ÷2。异或 ^ 还能不借临时变量交换两个数——三级必考！',
           tryit:'把 n 改成 20（偶数），看 & 1 的结果变成几。',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'boxes'},{type:'vars'}],
           code:`#include <iostream>
 using namespace std;
 
@@ -3822,7 +3822,7 @@ int main() {
         { id:'cpp3-9', title:'枚举 · 试除法判质数（三级考点）', story:'枚举算法=笨办法但一定对：判断 n 是不是质数，就用 2,3,4… 挨个试除。秘诀是只试到 √n——因为因子是成对出现的，一个大因子必然配一个小因子。',
           tryit:'把输入改成 2、1、97，看结果分别是什么。',
           inputs:['17'],
-          scenes:[{type:'vars'}],
+          scenes:[{type:'boxes'},{type:'vars'}],
           code:`#include <iostream>
 using namespace std;
 
@@ -3931,7 +3931,7 @@ int main() {
 }` },
         { id:'cpp4-6', title:'结构体 · 把数据"打包"（四级考点）', story:'一个学生有姓名、分数等多种信息——分散存太乱！struct 把它们打包成"学生类型"：s1.name、s1.score 用点号取成员。这是面向对象的第一步，四级必考！',
           tryit:'给 s2 的 score 再加 10 分（已有示例），或新建 s3 装你自己的信息。',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'boxes'},{type:'vars'}],
           code:`#include <iostream>
 #include <string>
 using namespace std;
@@ -4073,7 +4073,7 @@ int main() {
 }` },
         { id:'cpp5-5', title:'位运算 · 一排灯的遥控器', story:'把 int 想成一排 8 个小灯：| 按亮某盏（或）、& 保留/熄灭（与）、^ 反着来（异或）、~ 全部反转、<< 整排左移（×2）。0b1010 表示二进制直接写数！这是 GESP 高频考点。',
           tryit:'把 0b1010 改成 0b1101，自己口算每步结果再验证。',
-          scenes:[{type:'vars'}],
+          scenes:[{type:'boxes'},{type:'vars'}],
           code:`#include <iostream>
 using namespace std;
 
@@ -4393,7 +4393,7 @@ int main() {
 }` },
         { id:'cpp6-6', title:'STL 容器 · stack与queue（六级考点）', story:'C++ 自带"现成的栈和队列"：stack 后进先出（push/top/pop），queue 先进先出（push/front/pop）。竞赛里不用手写数组模拟——直接用 STL 容器，又快又稳。注意：top 看栈顶但不弹出，pop 弹出但不返回值！',
           tryit:'再加一次 s.pop() 前先判断 s.empty()，体会空栈弹出的危险。',
-          scenes:[{type:'vars'},{type:'output'}],
+          scenes:[{type:'array',watch:['s']},{type:'array',watch:['q']},{type:'output'}],
           code:`#include <iostream>
 #include <stack>
 #include <queue>
