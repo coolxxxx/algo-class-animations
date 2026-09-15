@@ -107,7 +107,7 @@ bool cmp(Goods x, Goods y) { return x.price < y.price; }
 
 ## 7. 多关键字 VIP 加长演示
 
-打开 **`easy_vip.html`**（同目录）：
+打开 **`vip-sort.html`**（同目录）：
 
 - 6 人队伍，VIP0/1/2 混编  
 - **插入式逐步比较**：取出 → 与左侧逐个 `cmp` → 后移 / 插入  
@@ -115,7 +115,7 @@ bool cmp(Goods x, Goods y) { return x.price < y.price; }
 - 底部日志记录每一步裁判理由  
 - 支持「下一步 / 自动播放 / 直接看结果」
 
-课堂用法：easy_sort ③ tab 建立概念 → easy_vip 让学生喊「下一步」跟裁判。
+课堂用法：easy_sort ③ tab 建立概念 → vip-sort 让学生喊「下一步」跟裁判。
 
 ---
 
@@ -124,7 +124,7 @@ bool cmp(Goods x, Goods y) { return x.price < y.price; }
 1. easy_sort ① 数组交换灾难（5′）  
 2. ② sort 默认排队（8′）  
 3. ③ cmp 裁判 VIP（10′）  
-4. **easy_vip 加长逐步比较**（10′）  
+4. **vip-sort 加长逐步比较**（10′）  
 5. 黑板默写 cmp + P1502（10′）  
 6. ④ 成绩表演示（5′）  
 7. 当堂题 1、2（10′）  
