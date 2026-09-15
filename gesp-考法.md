@@ -3,6 +3,9 @@
 > 本文不是整卷转载。依据 CCF **认证大纲**与 2026-09 等真题 PDF 归纳「怎么考 / 出题人思路 / 做题方法」。  
 > 官方真题：https://gesp.ccf.org.cn/101/1010/index.html · 大纲：https://gesp.ccf.org.cn/101/1008/10012.html
 
+**按级打印讲义**：[三～四级](gesp-L3-4.md) · [五～六级](gesp-L5-6.md) · [七～八级](gesp-L7-8.md)  
+**七～八级题单**：[notes-l78.md](notes-l78.md) · 拼装器含 BFS / Kruskal / 树后序
+
 展示台每课「学习路径」里若有 **GESP 怎么考**，会显示对应级与破题法。
 
 ---

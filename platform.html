@@ -2913,7 +2913,7 @@ for i in range(4):
       { lv: 2, title: '第2级 · 循环与列表', desc: 'for/while 循环、列表、字符串', lessons: [
         { id:'py2-1', title:'for 循环 · 跑步机上的计数器', story:'for i in range(1,6) 就像跑步机自动数圈：i 从 1 数到 5，每圈执行一次循环体。total 是"累计器"，把每圈的数字都加起来。',
           tryit:'把 range(1, 6) 改成 range(1, 11)，观察循环跑 10 圈。',
-          scenes:[{type:'boxes'}],
+          scenes:[{type:'array',watch:['i']},{type:'boxes'}],
           code:`total = 0
 
 for i in range(1, 6):
