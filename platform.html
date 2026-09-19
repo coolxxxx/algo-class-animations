@@ -503,6 +503,32 @@ body.embed #main{padding:0}
 .ll-curtag{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:800;color:var(--am);white-space:nowrap}
 
 
+
+/* ---------- 三栏导览：学什么 / 怎么学 / 怎么考 ---------- */
+#lessonGuide{margin:6px 0 8px;border-radius:14px;border:1px solid rgba(245,166,35,.35);background:linear-gradient(180deg,rgba(245,166,35,.10),rgba(15,23,42,.35));overflow:hidden}
+#lessonGuide.lg-hide{display:none}
+.lg-head{padding:7px 12px 0;font-size:12px;font-weight:800;color:#fcd34d;letter-spacing:.04em}
+.lg-grid{display:grid;grid-template-columns:1.15fr 1.4fr 1.25fr;gap:0}
+@media (max-width:1100px){.lg-grid{grid-template-columns:1fr}}
+.lg-col{padding:8px 12px 10px;min-width:0}
+.lg-col+.lg-col{border-left:1px solid rgba(148,163,184,.18)}
+@media (max-width:1100px){.lg-col+.lg-col{border-left:none;border-top:1px solid rgba(148,163,184,.18)}}
+.lg-label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:900;margin-bottom:4px}
+.lg-label .dot{width:8px;height:8px;border-radius:999px}
+.lg-learn .dot{background:#7dd3fc;box-shadow:0 0 8px rgba(76,194,255,.8)}
+.lg-how .dot{background:#3dd68c;box-shadow:0 0 8px rgba(61,214,140,.8)}
+.lg-exam .dot{background:#fbbf24;box-shadow:0 0 8px rgba(251,191,36,.8)}
+.lg-title{font-size:calc(14px * var(--fscale,1));font-weight:800;color:#fff;line-height:1.35}
+.lg-desc{font-size:calc(12px * var(--fscale,1));color:#cbd5e1;line-height:1.45;margin-top:2px}
+.lg-steps{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.lg-step{border:1px solid rgba(52,211,153,.35);background:rgba(52,211,153,.10);color:#8df0c5;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800;cursor:pointer}
+.lg-step:hover{background:rgba(52,211,153,.2);color:#d1fae5}
+.lg-step.sec{border-color:rgba(148,163,184,.3);background:rgba(148,163,184,.08);color:#e2e8f0}
+.lg-exam .lg-desc b{color:#fcd34d}
+.lg-cta{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px}
+.lg-link{font-size:12px;font-weight:700;color:#7dd3fc;text-decoration:none;border:1px solid rgba(76,194,255,.3);border-radius:999px;padding:4px 9px;background:rgba(76,194,255,.08);cursor:pointer}
+.lg-link:hover{background:rgba(76,194,255,.16)}
+
 /* ---------- 学习路径 · 学生八问 ---------- */
 #knowPath{margin:8px 0 10px;border:1px solid rgba(76,194,255,.25);border-radius:12px;background:rgba(76,194,255,.06);overflow:hidden}
 #knowPath.kp-hide{display:none}
@@ -557,6 +583,25 @@ body.embed #main{padding:0}
         <textarea id="code" spellcheck="false" autocomplete="off"></textarea>
       </div>
       <div id="tryit"><span id="lessonTryit"></span><span id="inputChips"></span></div>
+      <div id="lessonGuide" class="lg-hide">
+        <div class="lg-head">本课导览 · 学生先看这里</div>
+        <div class="lg-grid">
+          <div class="lg-col lg-learn">
+            <div class="lg-label"><span class="dot"></span>学什么</div>
+            <div class="lg-title" id="lgWhat">—</div>
+            <div class="lg-desc" id="lgWhatDesc"></div>
+          </div>
+          <div class="lg-col lg-how">
+            <div class="lg-label"><span class="dot"></span>怎么学（按顺序点）</div>
+            <div class="lg-steps" id="lgSteps"></div>
+          </div>
+          <div class="lg-col lg-exam">
+            <div class="lg-label"><span class="dot"></span>怎么考</div>
+            <div class="lg-desc" id="lgExam">—</div>
+            <div class="lg-cta" id="lgExamCta"></div>
+          </div>
+        </div>
+      </div>
       <div id="knowPath" class="kp-hide">
         <div class="kp-bar" id="kpBar"><span>🧭 学习路径 · 学生八问</span><span class="kp-tag">是什么→例子→解决什么→代码→语法→上手→哪里用→为何学</span><span class="kp-caret">›</span></div>
         <div class="kp-body" id="kpBody"></div>
@@ -7019,7 +7064,7 @@ function buildTaskStrip(){
       const current=!done&&steps.slice(0,k).every(x=>st[x[0]]);
       return '<button class="ts-step'+(done?' done':(current?' cur':''))+'" data-k="'+k+'">'+(done?'✓ ':'')+s[1]+'</button>';
     }).join('')+'</div>'+
-    '<div class="ts-hint">建议顺序：先走上方「🧭 学习路径 · 学生八问」，再回来做五步任务——全 ✓ 点亮 🎓「本课学完」。</div>';
+    '<div class="ts-hint">先看上方「三栏导览」（学什么→怎么学→怎么考），再按「怎么学」按钮一步步做；五步任务全 ✓ 点亮 🎓「本课学完」。</div>';
   strip.querySelectorAll('.ts-step').forEach(b=>{
     b.onclick=safe(()=>{ const s=steps[parseInt(b.dataset.k)]; if(s&&s[2]) s[2](); });
   });
@@ -7414,6 +7459,80 @@ function renderKnowPath(){
   el.classList.remove('kp-hide');
 }
 
+
+/* ---------- 三栏导览渲染 ---------- */
+function renderLessonGuide(){
+  const el=document.getElementById('lessonGuide');
+  if(!el||!state.lesson) return;
+  const id=state.lesson.id;
+  if(String(id).indexOf('free_')===0){ el.classList.add('lg-hide'); return; }
+  const kn=(typeof KNOW!=='undefined'&&KNOW[id])||null;
+  const ge=(typeof GESP!=='undefined'&&GESP[id])||null;
+  const vox=(typeof VOX_MAP!=='undefined'&&VOX_MAP[id])||null;
+  const title=state.lesson.title||'';
+  const story=state.lesson.story||'';
+  // 学什么：标题 + 故事首句
+  const what=document.getElementById('lgWhat');
+  const whatD=document.getElementById('lgWhatDesc');
+  if(what) what.textContent=title;
+  if(whatD){
+    const s=story.replace(/\s+/g,' ').trim();
+    const cut=s.split(/[。！？]/)[0];
+    whatD.textContent=cut?(cut+'。'):'';
+  }
+  // 怎么学
+  const stepsEl=document.getElementById('lgSteps');
+  if(stepsEl){
+    const steps=[];
+    if(vox) steps.push({t:'① 看VOX',f:()=>{ if(typeof showVoxForLesson==='function') showVoxForLesson(); }});
+    steps.push({t:(vox?'② ':'① ')+'跑动画',f:()=>{ if(typeof runCode==='function') runCode(); }});
+    steps.push({t:(vox?'③ ':'② ')+'改代码',f:()=>{ const ed=document.getElementById('code'); if(ed) ed.focus(); }});
+    steps.push({t:(vox?'④ ':'③ ')+'八问详解',f:()=>{ const kp=document.getElementById('knowPath'); if(kp){ kp.classList.add('kp-open'); kp.classList.remove('lg-hide'); kp.classList.remove('kp-hide'); kp.scrollIntoView({behavior:'smooth',block:'nearest'}); } }});
+    steps.push({t:(vox?'⑤ ':'④ ')+'语法卡',f:()=>{ if(typeof showSyn==='function') showSyn(); }});
+    stepsEl.innerHTML='';
+    steps.forEach((s,i)=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='lg-step'+(i>2?' sec':''); b.textContent=s.t;
+      b.onclick=safe(s.f);
+      stepsEl.appendChild(b);
+    });
+  }
+  // 怎么考
+  const ex=document.getElementById('lgExam');
+  const cta=document.getElementById('lgExamCta');
+  if(ex){
+    if(ge){
+      const tip=(kn&&kn.reflect)?('对体系帮助：'+kn.reflect):'';
+      ex.innerHTML='<b>'+esc(ge.lv)+'</b> · '+esc(ge.how)+
+        '<div style="margin-top:3px">注意：'+esc(ge.tip)+'</div>';
+    }else{
+      ex.innerHTML='完成「怎么学」各步；测验用「🎯 考考你 / ⌨️ 填空」巩固。';
+    }
+  }
+  if(cta){
+    cta.innerHTML='';
+    const add=(label,fn,href)=>{
+      if(href){
+        const a=document.createElement('a');
+        a.className='lg-link'; a.href=href; if(href.indexOf('http')===0){a.target='_blank';a.rel='noopener';}
+        a.textContent=label; cta.appendChild(a);
+      }else{
+        const b=document.createElement('button');
+        b.type='button'; b.className='lg-link'; b.textContent=label; b.onclick=safe(fn); cta.appendChild(b);
+      }
+    };
+    if(ge){
+      add('官网真题',null,'https://gesp.ccf.org.cn/101/1010/index.html');
+      const lv=ge.lv||'';
+      if(/七|八/.test(lv)){ add('L7-8讲义',null,'gesp-L7-8.md'); add('七八级题单',null,'notes-l78.md'); }
+      else if(/五|六/.test(lv)){ add('L5-6讲义',null,'gesp-L5-6.md'); }
+      else { add('L3-4讲义',null,'gesp-L3-4.md'); }
+    }
+    add('考考你',()=>{ if(typeof showQuiz==='function') showQuiz(); });
+  }
+  el.classList.remove('lg-hide');
+}
+
 function selectLesson(lang,id){
   state.lang=lang;
   let les=null;
@@ -7428,6 +7547,7 @@ function selectLesson(lang,id){
   $('#lessonTryit').innerHTML=les.tryit? '<b>✋ 试一试：</b>'+esc(les.tryit):'';
   $('#inputChips').innerHTML=(les.inputs&&les.inputs.length)?'<span class="muted">预设输入：</span>'+les.inputs.map(x=>'<span class="chip">'+esc(x)+'</span>').join(' '):'';
   if(typeof renderKnowPath==='function') renderKnowPath();
+  if(typeof renderLessonGuide==='function') renderLessonGuide();
   buildSidebar();
   kpIdx=0; updateBubble();
   runCode(true);
@@ -7441,6 +7561,7 @@ function selectFree(){
   $('#lessonTryit').textContent='';
   $('#inputChips').innerHTML='';
   const kp=document.getElementById('knowPath'); if(kp) kp.classList.add('kp-hide');
+  const lg=document.getElementById('lessonGuide'); if(lg) lg.classList.add('lg-hide');
   buildSidebar();
   runCode(true);
 }
