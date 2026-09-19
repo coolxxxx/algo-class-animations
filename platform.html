@@ -6716,6 +6716,56 @@ const KNOW = {
  * 不是转载整卷，是出题模式与解题策略
  * ============================================================ */
 const GESP = {
+  'py1-2': { lv:'Python一级', how:'选择题：类型判断、int()/str() 转换后输出', tip:'input 永远是字符串；运算前先转类型', setter:'考类型意识', do:'写出每一步 type()' },
+  'py1-3': { lv:'Python一级', how:'阅读 input+print 程序写输出', tip:'提示语不参与计算；int(input()) 才能加减', setter:'考输入输出链', do:'把输入值代入手算' },
+  'py1-4': { lv:'Python一级', how:'if/elif/else 改条件后输出', tip:'== 判断，= 赋值；命中即停', setter:'考分支', do:'用边界值各走一遍' },
+  'py1-5': { lv:'Python一级', how:'Turtle 画图步数/角度', tip:'前进转向次数=多边形边数', setter:'考循环+方向', do:'数 forward/right 次数' },
+  'py2-2': { lv:'Python二级', how:'while 改增量后循环次数/最终值', tip:'条件何时变假；忘记更新=死循环', setter:'考循环逼近', do:'列表 water 变化' },
+  'py2-4': { lv:'Python二级', how:'遍历列表求和/平均的输出', tip:'for 取的是元素不是下标；平均=总/个数', setter:'考遍历累加', do:'跟一遍 total' },
+  'py2-5': { lv:'Python二级/三级', how:'字符串遍历计数；切片结果', tip:'逐字符；空串边界', setter:'考序列思维', do:'把字符竖着写' },
+  'py2-6': { lv:'Python二级', how:'and/or/not 复合条件真假', tip:'and 全真才真；or 一真即真', setter:'考逻辑', do:'列真值表' },
+  'py2-7': { lv:'Python二级', how:'break 后循环次数与输出', tip:'break 跳出整个循环，continue 只跳本次', setter:'考控制流', do:'标出第几次 break' },
+  'py3-1': { lv:'Python三级', how:'函数调用输出、参数顺序', tip:'按位置传参；return 后调用结束', setter:'考模块化', do:'画参数进→返回值出' },
+  'py3-4': { lv:'Python三级/二级', how:'嵌套循环输出形状/次数', tip:'内层一圈外层一步；次数相乘', setter:'考嵌套', do:'数 print 次数' },
+  'py3-5': { lv:'Python三级', how:'回文判断；切片 [::-1] 输出', tip:'正读=倒读；切片含头不含尾', setter:'考字符串技巧', do:'对称位置画圈' },
+  'py3-6': { lv:'Python三级', how:'进制转换结果/短除余数顺序', tip:'余数倒着读；列表 append 在尾', setter:'考进制', do:'13→1101 手推' },
+  'py3-7': { lv:'Python三级', how:'元组不可变报错；拆包结果', tip:'改元组会 TypeError；可当字典键', setter:'考可变性', do:'先预测会不会报错' },
+  'py3-8': { lv:'Python三级', how:'random 结果范围；randint 是否含两端', tip:'randint 两端都含；choice 抽一个', setter:'考随机语义', do:'写清取值范围' },
+  'py3-9': { lv:'Python三级', how:'set 去重/交并；in 的结果', tip:'自动去重无序；& 交 | 并', setter:'考集合运算', do:'先列成 Venn 圈' },
+  'py4-5': { lv:'Python四级', how:'try/except 后程序是否继续、输出', tip:'异常被 except 接住可继续；else 无异常才走', setter:'考异常流', do:'标出走哪支' },
+  'py4-6': { lv:'Python四级', how:'文件模式 r/w/a；write 后读结果', tip:'w 会清空；指针位置决定读到哪', setter:'考持久化', do:'画文件指针' },
+  'py5-1': { lv:'Python五级', how:'选择排序每轮最小下标/交换次数', tip:'每轮选最小与队首换一次', setter:'考过程', do:'手推一轮 mi' },
+  'py5-2': { lv:'Python五级', how:'插入排序 key 移动后数组', tip:'比 key 大的右移，空位插入', setter:'考局部有序', do:'画手里牌+新牌' },
+  'py5-4': { lv:'Python五级', how:'桶计数数组下标与频次', tip:'值=桶号；空间 O(值域)', setter:'考空间换时间', do:'开桶画一下' },
+  'py5-7': { lv:'Python五级', how:'Node 类建链表；遍历输出', tip:'val+next；None 结束', setter:'考结点结构', do:'画盒子箭头' },
+  'py5-8': { lv:'Python五级', how:'按值删除后链表；短路与空指针', tip:'先判 next 再取 val', setter:'考删除改线', do:'画删除前中后' },
+  'py5-9': { lv:'Python五级', how:'尾插法输出顺序是否=插入序', tip:'tail 每次接到最后并后移', setter:'考顺序来源', do:'对比头插结果' },
+  'py6-2': { lv:'Python六级', how:'找零张数；面额顺序', tip:'大面额优先才有最优（该面额体系下）', setter:'考贪心', do:'列表每步余额' },
+  'py6-7': { lv:'Python六级', how:'类封装后属性互不干扰', tip:'self.xxx 是对象自己的', setter:'考封装', do:'两个对象各画一张表' },
+  'py6-8': { lv:'Python六级', how:'继承后方法调用输出；多态', tip:'子类可覆盖；看实际类型', setter:'考 OOP 三件套', do:'画类图父子' },
+  'cpp1-2': { lv:'C++一级', how:'类型定义与赋值是否合法', tip:'先声明后用；类型决定运算', setter:'考基础语法', do:'对照类型表' },
+  'cpp1-3': { lv:'C++一级', how:'cin 运算结果；整数除法/取余', tip:'17/5=3 不是 3.4；% 取余', setter:'考算术陷阱', do:'先口算再对码' },
+  'cpp2-2': { lv:'C++二级', how:'for 三件套循环次数与 total', tip:'i++ 何时执行；含不含上界', setter:'考循环', do:'列 i 取值' },
+  'cpp2-3': { lv:'C++二级', how:'while 达标次数', tip:'循环体必须让条件变假', setter:'考 while', do:'表格 week/money' },
+  'cpp2-4': { lv:'C++二级/三级', how:'嵌套循环输出形状', tip:'内层次数=列数', setter:'考嵌套', do:'数空格与个数' },
+  'cpp2-5': { lv:'C++二级', how:'&& || ! 结果；C++ 真输出 1', tip:'短路：&& 左假不看右', setter:'考逻辑', do:'真值小表' },
+  'cpp3-3': { lv:'C++三级', how:'string 拼接/下标/length', tip:'下标 0 起；+ 是拼接', setter:'考字符串', do:'逐步拼接' },
+  'cpp3-4': { lv:'C++三级', how:'函数返回值与调用输出', tip:'实参给形参；return 带回', setter:'考函数', do:'画调用箭头' },
+  'cpp3-5': { lv:'C++三级', how:'短除法二进制结果', tip:'余数倒读；数组存', setter:'考进制', do:'手算 25' },
+  'cpp3-6': { lv:'C++三级', how:'二维数组 s[i][j] 取值', tip:'先行后列；越界危险', setter:'考下标对', do:'座位表指认' },
+  'cpp3-7': { lv:'C++三级', how:'按权展开十进制值', tip:'从左 result=result*2+bit', setter:'考二进制读法', do:'跟算 1101' },
+  'cpp3-9': { lv:'C++三级', how:'试除法判质数输出；循环到哪', tip:'只试到 √n；n<2 非质数', setter:'考枚举优化', do:'列试除序列' },
+  'cpp4-4': { lv:'C++四级', how:'vector push_back 后 size/下标', tip:'从 0；size 动态变', setter:'考容器', do:'画会变长的格子' },
+  'cpp4-5': { lv:'C++四级', how:'指针遍历地址变化；*p 取值', tip:'连续内存；p+1 下一元素', setter:'考指针运算', do:'标地址编号' },
+  'cpp4-7': { lv:'C++四级', how:'结构体数组打擂台求最高', tip:'比较 stu[i].score；记下标', setter:'考信息管理', do:'跟循环写 mx' },
+  'cpp5-2': { lv:'C++五级', how:'选择排序交换次数/最终序列', tip:'每轮一次 swap(a[i],a[mi])', setter:'考过程', do:'手推 mi' },
+  'cpp5-5': { lv:'C++五级', how:'位运算灯泡模型结果', tip:'先写 8 位再按位', setter:'考位语义', do:'画灯泡' },
+  'cpp5-7': { lv:'C++五级', how:'活动选择 cmp 与结果个数', tip:'按结束时间排序', setter:'考贪心键', do:'时间轴' },
+  'cpp5-9': { lv:'C++五级', how:'链表按值删除代码/复杂度', tip:'改线不搬家；头结点特判', setter:'考指针操作', do:'画三格结点' },
+  'cpp6-2': { lv:'C++六级', how:'高精度加法进位结果', tip:'倒序存；最后 carry', setter:'考模拟竖式', do:'列竖式' },
+  'cpp6-3': { lv:'C++六级', how:'贪心找零张数', tip:'面额从大到小', setter:'考局部最优', do:'列表余额' },
+  'cpp6-5': { lv:'C++六级', how:'汉诺塔步数 2^n-1 或 move 输出', tip:'n-1→中转，搬最大，n-1 叠回', setter:'考递归模型', do:'n=3 手推 7 步' },
+
   'py1-1': { lv:'Python一级', how:'选择题：变量赋值后输出结果；改一行看输出变不变', tip:'先当草稿纸手算再对代码；注意 = 是赋值不是相等', setter:'考「名字和值」是否分清', do:'先写变量表再跑代码' },
   'py2-1': { lv:'Python二级', how:'阅读 for+range 写输出；问循环几次', tip:'range 含头不含尾；先列 i 的取值再展开循环体', setter:'考边界会不会数错', do:'把 i 逐个写在纸上再执行' },
   'py2-3': { lv:'Python二级/三级', how:'列表 append/pop 后长度与内容', tip:'从 0 开始数下标；pop 默认删最后一个', setter:'考容器操作是否熟练', do:'画一条格子标下标' },
@@ -7347,7 +7397,13 @@ function renderKnowPath(){
       '<li><b>出题思路</b>：'+esc(ge.setter)+'</li>'+
       '<li><b>做题方法</b>：'+esc(ge.do)+'</li>'+
       '</ul>'+
-      '<div style="margin-top:6px"><a class="kp-vox" href="https://gesp.ccf.org.cn/101/1010/index.html" target="_blank" rel="noopener">去官网刷同级真题</a></div>');
+      '<div style="margin-top:6px">'+
+      '<a class="kp-vox" href="https://gesp.ccf.org.cn/101/1010/index.html" target="_blank" rel="noopener">官网真题</a> '+
+      '<a class="kp-vox" style="margin-left:6px" href="gesp-考法.md">考法总表</a> '+
+      (/七|八/.test(ge.lv)?'<a class="kp-vox" style="margin-left:6px" href="gesp-L7-8.md">L7-8讲义</a> <a class="kp-vox" style="margin-left:6px" href="notes-l78.md">七八级题单</a>':
+       /五|六/.test(ge.lv)?'<a class="kp-vox" style="margin-left:6px" href="gesp-L5-6.md">L5-6讲义</a>':
+       '<a class="kp-vox" style="margin-left:6px" href="gesp-L3-4.md">L3-4讲义</a>')+
+      '</div>');
   }
   if(kn&&kn.reflect) add(8,'为什么要学？对我有什么帮助？', esc(kn.reflect));
   body.innerHTML=rows.join('');
